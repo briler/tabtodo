@@ -1,0 +1,69 @@
+body {
+  font-family: Helvetica, sans-serif;
+  max-width: 500px;
+}
+
+#popup {
+  
+  height: 300px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+
+#listsprites {float:left; margin:0px; font:12px/14px 'lucida grande', tahoma, verdana, arial, sans-serif;}
+#listsprites a {border:0; color:#3B5998; text-decoration:none; line-height:30px;}
+#listsprites a:hover,
+#listsprites a:focus,
+#listsprites a:active {text-decoration:underline; background:transparent;}
+#listsprites ul {padding:0; margin:0; list-style:none;}
+#listsprites li a {
+  display:block; 
+  /*padding:0px 8px 4px 6px;*/
+  white-space: nowrap; 
+  max-width: 380px;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
+#listsprites li a:hover,
+#listsprites li a:focus,
+#listsprites li a:active {
+    text-decoration: none; 
+    -moz-box-shadow: 0px 0px 3px #403f40;
+    -webkit-box-shadow: 0px 0px 3px #403f40;
+    box-shadow: 0px 0px 3px #403f40;
+  }
+#listsprites li.current a {font-weight:bold; color:#333; background:#D8DFEA;}
+
+#listsprites li a:before {
+    content:"";
+    float:left;
+    /*width:28px;*/
+    height:30px;
+    /*margin:0 6px 0 0;*/
+}
+
+.listItemThumnail {
+  min-width: 20px;
+  min-height: 1px;
+  display: inline-block;
+  vertical-align: baseline;
+}
+.listItemTitle
+{
+  overflow:hidden;
+  text-overflow: ellipsis;
+  width: 80%;
+  padding-right: 20px;
+}
+.listItemButtons
+{
+  position: fixed;
+  right: 1px;
+  margin: auto;
+  min-width: 20px;
+  min-height: 1px;
+  display: inline-block;
+}
