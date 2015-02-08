@@ -103,14 +103,11 @@ myApp.directive('contentItem', function ($compile) {
 
      return {
         restrict: "E",
-        template:'<ng-include src="getTemplateUrl()"/>'
+        link: linker,
         scope: {
             content:'=',
             changeTab:'&'
         },
-        controller: function ($scope) {
-            
-        }
         
     };
 
