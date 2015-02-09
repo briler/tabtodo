@@ -19,10 +19,10 @@
         </header>
 
         <div ng-controller="PageController">
-             <div >Tabs : {{tabsInfo.length}} </div>
+             <div >Tabs :</div>
             <div id='listsprites'>
                 <ul ui-sortable ng-model='tabsInfo'>
-                    <content-item ng-repeat="item in content" content="item"></content-item>
+                    <content-item change-tab="changeTabPage(tabToChange)" ng-repeat="item in content" content="item"></content-item>
                 </ul>
 
                 

@@ -58,8 +58,8 @@ myApp.service('tabsInfoService', function() {
 myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoService) {
     $scope.message = "TabToDo First demo";
 
-    this.changeTab = function (tabId){
-      tabsInfoService.changeTab(tabId);
+    $scope.changeTabPage = function (tabId){
+        tabsInfoService.changeTab(tabId);
     };
 
     pageInfoService.getInfo(function (info) {
@@ -80,7 +80,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 });
 
 myApp.directive('contentItem', function ($compile) {
-    var tabTemplate = '<li><a href="#" ng-click="changeTab({{content.tabId}})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span><span class="listItemButtons">X</span></a></li>';
+    var tabTemplate = '<li><a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span><span class="listItemButtons">X</span></a></li>';
     var getTemplate = function(contentType) {
         var template = '';
 
@@ -96,9 +96,10 @@ myApp.directive('contentItem', function ($compile) {
     var linker = function(scope, element, attrs) {
         //scope.rootDirectory = 'images/';
         element.html(getTemplate(scope.content.type)).show();
+        
+        $compile(element.contents())(scope);
 
-
-        $compile(element.contents())(scope.$new());
+        
     }
 
      return {
@@ -107,7 +108,9 @@ myApp.directive('contentItem', function ($compile) {
         scope: {
             content:'=',
             changeTab:'&'
-        },
+        }
+        
+       
         
     };
 
