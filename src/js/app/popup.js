@@ -25,6 +25,10 @@ myApp.service('tabsInfoService', function() {
         chrome.tabs.update(tabId, {selected: true});
     };
 
+     this.closeTab = function (tabId) {
+        chrome.tabs.remove(tabId, function () {})
+    };
+
 
     this.getTabsInfo = function(callback) {
         
@@ -62,6 +66,34 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         tabsInfoService.changeTab(tabId);
     };
 
+    $scope.closeTabPage = function (tabId, index){
+        // remove from list
+        $scope.content.splice(index,1);
+        // close teh tab
+        tabsInfoService.closeTab(tabId);
+    };
+
+    $scope.makeTaskPage = function (tabId, index){
+        // change state
+        $scope.content[index] = changeState($scope.content[index], "openTask");
+    };
+
+    $scope.completeTaskPage = function (tabId, index){
+        // change state
+        $scope.content[index] = changeState($scope.content[index], "completeTask");
+    };
+
+    function changeState(tabItemModel, newState){
+            var model = {};
+                model.type = newState;
+                model.title = tabItemModel.title;
+                model.url = tabItemModel.url;
+                model.favIconUrl = tabItemModel.favIconUrl;
+                model.tabId = tabItemModel.id;
+
+            return model;
+    };
+
     pageInfoService.getInfo(function (info) {
         $scope.title = info.title;
         $scope.url = info.url;
@@ -70,23 +102,42 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         $scope.$apply();
     });
 
-    tabsInfoService.getTabsInfo(function (tabsInfos) 
-    {
-        $scope.content = tabsInfos;
-        $scope.$apply();
-    });
-
+    $scope.getTabsInfo = (function () {
+        tabsInfoService.getTabsInfo(function (tabsInfos) 
+        {
+            $scope.content = tabsInfos;
+            $scope.$apply();
+        });    
+    })();
+    
+    function findTab(tabId) {
+        //search array for key
+        var items = $scope.content;
+        for(var i = 0; i < items.length; ++i) {
+            //if the name is what we are looking for return it
+            if(items[i].tabId === tabId)
+                return items[i];
+        }
+    }
    
 });
 
 myApp.directive('contentItem', function ($compile) {
-    var tabTemplate = '<li><a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span><span class="listItemButtons">X</span></a></li>';
+    var tabTemplate = '<li><span class="listItemButtons"><button ng-click="closeTab({tabToChange:content.tabId})">Close</button><button ng-click="makeTask({tabToChange:content.tabId})">Make A task</button> </span><a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span></a></li>';
+    var openTaskTemplate = '<li class="task"><span class="listItemButtons"><button ng-click="closeTab({tabToChange:content.tabId})">Close</button><button ng-click="completeTask({tabToChange:content.tabId})">Done!</button> </span><a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} >TASK:: {{content.title}}</span></a></li>';
+    var completeTaskTemplate = '<li class="completeTask"><span class="listItemButtons"><button ng-click="closeTab({tabToChange:content.tabId})">Close</button><button ng-click="makeTask({tabToChange:content.tabId})">Make A task</button> </span><a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} >complete:: {{content.title}}</span></a></li>';
     var getTemplate = function(contentType) {
         var template = '';
-
+        console.log("setting from teplate"+ contentType);
         switch(contentType) {
             case 'tab':
                 template = tabTemplate;
+                break;
+            case 'openTask':
+                template = openTaskTemplate;
+                break;
+            case 'completeTask':
+                template = completeTaskTemplate;
                 break;
         }
 
@@ -107,7 +158,10 @@ myApp.directive('contentItem', function ($compile) {
         link: linker,
         scope: {
             content:'=',
-            changeTab:'&'
+            changeTab:'&',
+            closeTab:'&',
+            makeTask:'&',
+            completeTask:'&'
         }
         
        
