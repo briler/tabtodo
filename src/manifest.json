@@ -15,6 +15,6 @@
 	"run_at": "document_start"
 	} ],
 	"minimum_chrome_version": "18",
-	"permissions": [ "http://*/*", "https://*/*", "unlimitedStorage", "contextMenus", "cookies", "tabs", "notifications","activeTab" ]
+	"permissions": [ "http://*/*", "https://*/*", "storage", "contextMenus", "cookies", "tabs", "notifications","activeTab" ]
 
 }

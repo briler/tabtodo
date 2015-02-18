@@ -19,6 +19,27 @@
     };
 });
 
+
+myApp.service('tabsStorageService', function () {
+    this.saveTabs = function (tabsList) {
+        chrome.storage.sync.set({'tabsList': tabsList}, function() {
+          // Notify that we saved.
+          //message('Settings saved');
+        });
+    }
+
+    this.getTabs = function (callback){
+        chrome.storage.sync.get('tabsList', function (value) {
+            if (value && value.tabsList)
+                callback(value.tabsList);
+            callback(null);
+        })
+
+    }
+
+});
+
+
 myApp.service('tabsInfoService', function() {
 
     this.changeTab = function (tabId) {
@@ -45,10 +66,8 @@ myApp.service('tabsInfoService', function() {
                 model.favIconUrl = tabs[i].favIconUrl;
                 model.tabId = tabs[i].id;
 
-
                 chrome.tabs.sendMessage(tabs[i].id, { 'action': 'PageInfo' }, function (response) {
                     model.pageInfos = response;
-                    
                 });
 
                 reponseArray.push(model);
@@ -59,7 +78,12 @@ myApp.service('tabsInfoService', function() {
 });
 
 
-myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoService) {
+myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoService, tabsStorageService) {
+
+    $scope.tasksArray = [];
+        
+    
+
     $scope.message = "TabToDo First demo";
 
     $scope.changeTabPage = function (tabId){
@@ -76,12 +100,20 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     $scope.makeTaskPage = function (tabId, index){
         // change state
         $scope.content[index] = changeState($scope.content[index], "openTask");
+        saveTasksArray(index);
     };
 
     $scope.completeTaskPage = function (tabId, index){
         // change state
         $scope.content[index] = changeState($scope.content[index], "completeTask");
+        saveTasksArray(index);
     };
+
+    function saveTasksArray(index) {
+        $scope.tasksArray[''+$scope.content[index].tabId] = $scope.content[index];
+        
+        tabsStorageService.saveTabs($scope.tasksArray);
+    }
 
     function changeState(tabItemModel, newState){
             var model = {};
@@ -89,8 +121,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                 model.title = tabItemModel.title;
                 model.url = tabItemModel.url;
                 model.favIconUrl = tabItemModel.favIconUrl;
-                model.tabId = tabItemModel.id;
-
+                model.tabId = tabItemModel.tabId;
             return model;
     };
 
@@ -101,13 +132,59 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         
         $scope.$apply();
     });
+    $scope.testLoad = function () {
+        debugger;
 
+        tabsStorageService.getTabs(function (storageTabInfos){
+            console.log(storageTabInfos);
+        });
+    }
+
+    $scope.testSave = function () {
+        debugger;
+        console.log("Saving tasks array : "+ tasksArray);
+        tabsStorageService.saveTabs(tasksArray);
+        //};
+    }
+
+
+    $scope.reload = function () {
+      //  alert('reload');
+        tabsStorageService.getTabs(function (storageTabInfos){
+            if (storageTabInfos){
+                tasksArray = storageTabInfos;
+            }
+            tabsInfoService.getTabsInfo(function (tabsInfos) {
+                var found=false;
+                for (var i=0;i<tabsInfos.length;i++) {
+                    
+                     var tabId = tabsInfos[i].tabId;
+                     if (tasksArray[tabId]){
+                         console.log("found tab in stroage array");
+                         console.log(tasksArray[tabId]);
+                         tabsInfos[i] = tasksArray[tabId];
+                         found = true;
+                     }
+                }
+
+                if (found)
+                   $scope.tasksArray =  tasksArray;
+                else
+                   $scope.tasksArray = [];
+
+
+                $scope.content = tabsInfos;
+                $scope.$apply();
+                
+            });    
+        });
+
+    };
     $scope.getTabsInfo = (function () {
-        tabsInfoService.getTabsInfo(function (tabsInfos) 
-        {
-            $scope.content = tabsInfos;
-            $scope.$apply();
-        });    
+        // We get tasks info from storage.
+        
+        $scope.reload();
+        
     })();
     
     function findTab(tabId) {
@@ -123,15 +200,27 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 });
 
 myApp.directive('contentItem', function ($compile) {
-    var tabTemplate = '<li><span class="listItemButtons"><button ng-click="closeTab({tabToChange:content.tabId})">Close</button><button ng-click="makeTask({tabToChange:content.tabId})">Make A task</button> </span><a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span></a></li>';
-    var openTaskTemplate = '<li class="task"><span class="listItemButtons"><button ng-click="closeTab({tabToChange:content.tabId})">Close</button><button ng-click="completeTask({tabToChange:content.tabId})">Done!</button> </span><a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} >TASK:: {{content.title}}</span></a></li>';
-    var completeTaskTemplate = '<li class="completeTask"><span class="listItemButtons"><button ng-click="closeTab({tabToChange:content.tabId})">Close</button><button ng-click="makeTask({tabToChange:content.tabId})">Make A task</button> </span><a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} >complete:: {{content.title}}</span></a></li>';
+    var closeButton = '<span class="closeTab" ng-click="closeTab({tabToChange:content.tabId})" title="Close this tab"><img src="img/x.png" /> </span>';
+    var makeTaskButton = '<button ng-click="makeTask({tabToChange:content.tabId})">Make task</button>';
+    var completeTaskButton = '<input type="checkbox" ng-click="completeTask({tabToChange:content.tabId})" title="Mark as Done" style="cursor:pointer;">';
+    var reopnTaskButton = '<input type="checkbox" ng-click="makeTask({tabToChange:content.tabId})" checked title="Reopen task" style="cursor:pointer;">';
+    var linkTabTemplate = '<a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span></a>'
+
+
+    var tabTemplate = '<li><span class="listItemButtons">'+ makeTaskButton + closeButton +'</span>' + linkTabTemplate +'</li>';
+    var highlightedTabTemplate = '<li class="active"><span class="listItemButtons">'+ makeTaskButton + closeButton +'</span>' + linkTabTemplate +'</li>';
+    var openTaskTemplate = '<li class="task"><span class="listItemButtons">' + completeTaskButton +closeButton +'</span>' + linkTabTemplate +'</li>';
+    var completeTaskTemplate = '<li class="completeTask"><span class="listItemButtons">' + reopnTaskButton + closeButton + '</span>' + linkTabTemplate +'</li>';
+
     var getTemplate = function(contentType) {
         var template = '';
         console.log("setting from teplate"+ contentType);
         switch(contentType) {
             case 'tab':
                 template = tabTemplate;
+                break;
+            case 'highlightedTab':
+                templte = highlightedTabTemplate;
                 break;
             case 'openTask':
                 template = openTaskTemplate;

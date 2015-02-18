@@ -19,6 +19,12 @@
         </header>
 
         <div ng-controller="PageController">
+        <!--
+            <button ng-click="reload()">Reload</button>
+            <button ng-click="testLoad()">testLoad</button>
+            <button ng-click="testSave()">testSave</button> -->
+            <br />
+
             <div id='listsprites'>
                 <ul ui-sortable ng-model='content'>
                     <content-item ng-repeat="item in content" content="item"
