@@ -1,4 +1,5 @@
-﻿myApp.service('pageInfoService', function() {
+﻿
+myApp.service('pageInfoService', function() {
     this.getInfo = function(callback) {
         var model = {};
 
@@ -65,7 +66,7 @@ myApp.service('tabsInfoService', function() {
                 model.url = tabs[i].url;
                 model.favIconUrl = tabs[i].favIconUrl;
                 model.tabId = tabs[i].id;
-
+                
                 chrome.tabs.sendMessage(tabs[i].id, { 'action': 'PageInfo' }, function (response) {
                     model.pageInfos = response;
                 });
@@ -107,6 +108,11 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         // change state
         $scope.content[index] = changeState($scope.content[index], "completeTask");
         saveTasksArray(index);
+    };
+
+    $scope.changeDueTaskPage = function (tabId){
+        // change state
+        alert(tabId);
     };
 
     function saveTasksArray(index) {
@@ -200,11 +206,13 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 });
 
 myApp.directive('contentItem', function ($compile) {
-    var closeButton = '<span class="closeTab" ng-click="closeTab({tabToChange:content.tabId})" title="Close this tab"><img src="img/x.png" /> </span>';
-    var makeTaskButton = '<button ng-click="makeTask({tabToChange:content.tabId})">Make task</button>';
-    var completeTaskButton = '<input type="checkbox" ng-click="completeTask({tabToChange:content.tabId})" title="Mark as Done" style="cursor:pointer;">';
-    var reopnTaskButton = '<input type="checkbox" ng-click="makeTask({tabToChange:content.tabId})" checked title="Reopen task" style="cursor:pointer;">';
+    var closeButton = '<span class="closeTab" ng-click="closeTab({tabToChange:content.tabId})" title="Close this tab"><img src="img/x.png" style="height: 20px; vertical-align:middle;" /> </span>';
+    var makeTaskButton = '<button class="btn btn-primary btn-small" ng-click="makeTask({tabToChange:content.tabId})">Make task</button>';
+    var completeTaskButton = '<input type="checkbox" ng-click="completeTask({tabToChange:content.tabId})" title="Mark as Done" style="cursor:pointer; vertical-align:middle;">';
+    var reopnTaskButton = '<input type="checkbox" ng-click="makeTask({tabToChange:content.tabId})" checked title="Reopen task" style="cursor:pointer; vertical-align:middle;">';
     var linkTabTemplate = '<a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px; vertical-align:middle;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span></a>'
+    //var datePicker= '<timepicker ng-model="content.duetime" ng-change="changeDue({tabToChange:content.duetime})"></timepicker>';
+    var datePicker= '<input type="text" size="8" ng-model="content.duetime" name="time" bs-timepicker data-time-format="HH:mm" data-length="1" data-minute-step="1" data-arrow-behavior="picker">';
 
 
     var tabTemplate = '<li><span class="listItemButtons">'+ makeTaskButton + closeButton +'</span>' + linkTabTemplate +'</li>';
@@ -250,7 +258,8 @@ myApp.directive('contentItem', function ($compile) {
             changeTab:'&',
             closeTab:'&',
             makeTask:'&',
-            completeTask:'&'
+            completeTask:'&',
+            changeDue:'&'
         }
         
        

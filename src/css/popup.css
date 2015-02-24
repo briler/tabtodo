@@ -1,7 +1,7 @@
 body {
   font-family: Helvetica, sans-serif;
   max-width: 500px;
-  width: 450px;
+  width: 480px;
 }
 
 #popup {
@@ -29,7 +29,7 @@ body {
   text-overflow: ellipsis;
 }
 
-.closeTab { height: 16px; width: 16px; background-image: url("img/x.png"); cursor: pointer; ; }
+.closeTab { height: 16px; width: 16px; cursor: pointer; ; }
 
 #listsprites li.active a {font-weight:bold; color:#333; background:#D8DFEA;}
 #listsprites li.task a {font-weight:bold; color:#333; background:#D8DFEA;}

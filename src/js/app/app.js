@@ -1,1 +1,1 @@
-﻿var myApp = angular.module('tabtodo', ['ui']);
+﻿var myApp = angular.module('tabtodo', ['ngAnimate', 'mgcrea.ngStrap']);
