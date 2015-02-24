@@ -204,7 +204,7 @@ myApp.directive('contentItem', function ($compile) {
     var makeTaskButton = '<button ng-click="makeTask({tabToChange:content.tabId})">Make task</button>';
     var completeTaskButton = '<input type="checkbox" ng-click="completeTask({tabToChange:content.tabId})" title="Mark as Done" style="cursor:pointer;">';
     var reopnTaskButton = '<input type="checkbox" ng-click="makeTask({tabToChange:content.tabId})" checked title="Reopen task" style="cursor:pointer;">';
-    var linkTabTemplate = '<a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span></a>'
+    var linkTabTemplate = '<a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px; vertical-align:middle;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span></a>'
 
 
     var tabTemplate = '<li><span class="listItemButtons">'+ makeTaskButton + closeButton +'</span>' + linkTabTemplate +'</li>';
