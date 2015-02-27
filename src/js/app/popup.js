@@ -156,28 +156,31 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 
     $scope.reload = function () {
       //  alert('reload');
+        var tasksArray;
         tabsStorageService.getTabs(function (storageTabInfos){
             if (storageTabInfos){
                 tasksArray = storageTabInfos;
             }
             tabsInfoService.getTabsInfo(function (tabsInfos) {
-                var found=false;
-                for (var i=0;i<tabsInfos.length;i++) {
-                    
-                     var tabId = tabsInfos[i].tabId;
-                     if (tasksArray[tabId]){
-                         console.log("found tab in stroage array");
-                         console.log(tasksArray[tabId]);
-                         tabsInfos[i] = tasksArray[tabId];
-                         found = true;
-                     }
+                if (tasksArray)
+                {
+                    var found=false;
+                    for (var i=0;i<tabsInfos.length;i++) {
+                        
+                         var tabId = tabsInfos[i].tabId;
+                         if (tasksArray[tabId]){
+                             console.log("found tab in stroage array");
+                             console.log(tasksArray[tabId]);
+                             tabsInfos[i] = tasksArray[tabId];
+                             found = true;
+                         }
+                    }
+
+                    if (found)
+                       $scope.tasksArray =  tasksArray;
+                    else
+                       $scope.tasksArray = [];
                 }
-
-                if (found)
-                   $scope.tasksArray =  tasksArray;
-                else
-                   $scope.tasksArray = [];
-
 
                 $scope.content = tabsInfos;
                 $scope.$apply();
