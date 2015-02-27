@@ -51,7 +51,18 @@ myApp.service('tabsInfoService', function() {
         chrome.tabs.remove(tabId, function () {})
     };
 
+    this.renameTab = function(tabID, setTitle) {
+    chrome.extension.sendMessage(
+        {to:"background", relTabID:tabID, title:setTitle});
+    }
 
+chrome.extension.onMessage.addListener(
+    function(request,sender,sendResponse) {
+        if (request.to == "background") {
+            activateLock(request.title, request.relTabID);
+        }
+    }
+) ;
     this.getTabsInfo = function(callback) {
         
         var reponseArray = [];
@@ -89,6 +100,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 
     $scope.changeTabPage = function (tabId){
         tabsInfoService.changeTab(tabId);
+
     };
 
     $scope.closeTabPage = function (tabId, index){
@@ -110,6 +122,20 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         saveTasksArray(index);
     };
 
+    $scope.renameTabPage = function (tabId, index) {
+        debugger;
+        $scope.content[index].editing = false;
+
+        if ($scope.tasksArray[''+$scope.content[index].tabId])
+        {
+            console.log("active task");
+            $scope.tasksArray[''+$scope.content[index].tabId].title =  $scope.content[index].title;
+            saveTasksArray(index);
+        }
+
+        tabsInfoService.renameTab(tabId, $scope.content[index].title);
+    }
+
     $scope.changeDueTaskPage = function (tabId){
         // change state
         alert(tabId);
@@ -130,6 +156,8 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                 model.tabId = tabItemModel.tabId;
             return model;
     };
+
+
 
     pageInfoService.getInfo(function (info) {
         $scope.title = info.title;
@@ -209,14 +237,17 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 });
 
 myApp.directive('contentItem', function ($compile) {
+
+    var contentTitle = '<span ng-hide="content.editing">{{content.title}}<a ng-hide="content.editing" class="inline" href="#" ng-click="content.editing = true" title="rename tab"><img src="img/edit-icon.png" /></a></span><span ng-show="content.editing"><input ng-model="content.title"><a class="inline" href="#" ng-click="renameTab({tabToChange:content.tabId})">Done editing?</a></span>'
     var closeButton = '<span class="closeTab" ng-click="closeTab({tabToChange:content.tabId})" title="Close this tab"><img src="img/x.png" style="height: 20px; vertical-align:middle;" /> </span>';
     var makeTaskButton = '<button class="btn btn-primary btn-small" ng-click="makeTask({tabToChange:content.tabId})">Make task</button>';
     var completeTaskButton = '<input type="checkbox" ng-click="completeTask({tabToChange:content.tabId})" title="Mark as Done" style="cursor:pointer; vertical-align:middle;">';
     var reopnTaskButton = '<input type="checkbox" ng-click="makeTask({tabToChange:content.tabId})" checked title="Reopen task" style="cursor:pointer; vertical-align:middle;">';
-    var linkTabTemplate = '<a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px; vertical-align:middle;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span></a>'
+    //var linkTabTemplate = '<a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px; vertical-align:middle;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span></a>'
+    var linkTabTemplate = '<a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px; vertical-align:middle;" /></span><span class="listItemTitle" title={{content.title}} >'+ contentTitle+'</span></a>';
     //var datePicker= '<timepicker ng-model="content.duetime" ng-change="changeDue({tabToChange:content.duetime})"></timepicker>';
     var datePicker= '<input type="text" size="8" ng-model="content.duetime" name="time" bs-timepicker data-time-format="HH:mm" data-length="1" data-minute-step="1" data-arrow-behavior="picker">';
-
+    
 
     var tabTemplate = '<li><span class="listItemButtons">'+ makeTaskButton + closeButton +'</span>' + linkTabTemplate +'</li>';
     var highlightedTabTemplate = '<li class="active"><span class="listItemButtons">'+ makeTaskButton + closeButton +'</span>' + linkTabTemplate +'</li>';
@@ -262,7 +293,8 @@ myApp.directive('contentItem', function ($compile) {
             closeTab:'&',
             makeTask:'&',
             completeTask:'&',
-            changeDue:'&'
+            changeDue:'&',
+            renameTab:'&'
         }
         
        
