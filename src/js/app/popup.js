@@ -83,8 +83,8 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 
     $scope.tasksArray = [];
         
-    
-
+    $scope.editorEnabled = false;
+    $scope.title = 'title';
     $scope.message = "TabToDo First demo";
 
     $scope.changeTabPage = function (tabId){

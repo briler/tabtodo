@@ -26,6 +26,15 @@
         </header>
 
         <div ng-controller="PageController">
+    <div ng-hide="editorEnabled">
+      {{title}}
+      <a href="#" ng-click="editorEnabled=!editorEnabled">Edit title</a>
+    </div>
+    <div ng-show="editorEnabled">
+      <input ng-model="title">
+      <a href="#" ng-click="editorEnabled=!editorEnabled">Done editing?</a>
+    </div>
+
         <!--
             <button ng-click="reload()">Reload</button>
             <button ng-click="testLoad()">testLoad</button>
