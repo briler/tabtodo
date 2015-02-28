@@ -38,6 +38,7 @@
                 <ul ng-model='content'>
                     <content-item ng-repeat="item in content" content="item"
                     close-tab="closeTabPage(tabToChange, $index)" 
+                    untask-tab="untaskTabPage(tabToChange, $index)"
                     change-tab="changeTabPage(tabToChange)" 
                     make-task="makeTaskPage(tabToChange, $index)" 
                     complete-task="completeTaskPage(tabToChange, $index)"

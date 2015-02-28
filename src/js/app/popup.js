@@ -116,6 +116,13 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         saveTasksArray(index);
     };
 
+    //unTabPage
+    $scope.untaskTabPage = function (tabId, index){
+        // change state
+        $scope.content[index] = changeState($scope.content[index], "tab");
+        saveTasksArray(index);
+    };
+
     $scope.completeTaskPage = function (tabId, index){
         // change state
         $scope.content[index] = changeState($scope.content[index], "completeTask");
@@ -238,8 +245,9 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 
 myApp.directive('contentItem', function ($compile) {
 
-    var contentTitle = '<span ng-hide="content.editing">{{content.title}}<a ng-hide="content.editing" class="inline" href="#" ng-click="content.editing = true" title="rename tab"><img src="img/edit-icon.png" /></a></span><span ng-show="content.editing"><input ng-model="content.title"><a class="inline" href="#" ng-click="renameTab({tabToChange:content.tabId})">Done editing?</a></span>'
-    var closeButton = '<span class="closeTab" ng-click="closeTab({tabToChange:content.tabId})" title="Close this tab"><img src="img/x.png" style="height: 20px; vertical-align:middle;" /> </span>';
+    var contentTitle = '<span ng-hide="content.editing">{{content.title}}<a ng-hide="content.editing" class="inline" href="#" ng-click="content.editing = true" title="rename tab"><img src="img/edit-icon.png" /></a></span><span ng-show="content.editing"><input ng-model="content.title" ng-enter="renameTab({tabToChange:content.tabId})"><a class="inline" href="#" ng-click="renameTab({tabToChange:content.tabId})">Done editing?</a></span>'
+    var closeButton = '<span class="closeTab" ng-click="closeTab({tabToChange:content.tabId})" title="Close this tab"><img src="img/x.png" /> </span>';
+    var untaskButton = '<span class="closeTab" ng-click="untaskTab({tabToChange:content.tabId})" title="un-task"><img src="img/undo-icon.png" /> </span>';
     var makeTaskButton = '<button class="btn btn-primary btn-small" ng-click="makeTask({tabToChange:content.tabId})">Make task</button>';
     var completeTaskButton = '<input type="checkbox" ng-click="completeTask({tabToChange:content.tabId})" title="Mark as Done" style="cursor:pointer; vertical-align:middle;">';
     var reopnTaskButton = '<input type="checkbox" ng-click="makeTask({tabToChange:content.tabId})" checked title="Reopen task" style="cursor:pointer; vertical-align:middle;">';
@@ -249,9 +257,9 @@ myApp.directive('contentItem', function ($compile) {
     var datePicker= '<input type="text" size="8" ng-model="content.duetime" name="time" bs-timepicker data-time-format="HH:mm" data-length="1" data-minute-step="1" data-arrow-behavior="picker">';
     
 
-    var tabTemplate = '<li><span class="listItemButtons">'+ makeTaskButton + closeButton +'</span>' + linkTabTemplate +'</li>';
-    var highlightedTabTemplate = '<li class="active"><span class="listItemButtons">'+ makeTaskButton + closeButton +'</span>' + linkTabTemplate +'</li>';
-    var openTaskTemplate = '<li class="task"><span class="listItemButtons">' + completeTaskButton +closeButton +'</span>' + linkTabTemplate +'</li>';
+    var tabTemplate = '<li><span class="listItemButtons">'+ makeTaskButton +'</span>' + linkTabTemplate +'</li>';
+    var highlightedTabTemplate = '<li class="active"><span class="listItemButtons">'+ makeTaskButton + '</span>' + linkTabTemplate +'</li>';
+    var openTaskTemplate = '<li class="task"><span class="listItemButtons">' + completeTaskButton + untaskButton +'</span>' + linkTabTemplate +'</li>';
     var completeTaskTemplate = '<li class="completeTask"><span class="listItemButtons">' + reopnTaskButton + closeButton + '</span>' + linkTabTemplate +'</li>';
 
     var getTemplate = function(contentType) {
@@ -292,6 +300,7 @@ myApp.directive('contentItem', function ($compile) {
             changeTab:'&',
             closeTab:'&',
             makeTask:'&',
+            untaskTab:'&',
             completeTask:'&',
             changeDue:'&',
             renameTab:'&'
@@ -300,9 +309,20 @@ myApp.directive('contentItem', function ($compile) {
        
         
     };
+});
 
+myApp.directive('ngEnter', function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown keypress", function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.ngEnter);
+                });
 
-
+                event.preventDefault();
+            }
+        });
+    };
 });
 
 

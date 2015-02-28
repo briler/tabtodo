@@ -1,4 +1,5 @@
 function activateLock(setTitle, tabID) {
+  debugger;
 	chrome.tabs.executeScript(tabID,
       {code:"document.title='" + setTitle + "'"});
 	
@@ -13,7 +14,6 @@ function activateLock(setTitle, tabID) {
 }
 
 chrome.extension.onMessage.addListener(
-    alert('changed event');
     function(request,sender,sendResponse) {
         if (request.to == "background") {
             activateLock(request.title, request.relTabID);
