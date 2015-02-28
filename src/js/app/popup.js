@@ -56,12 +56,19 @@ myApp.service('tabsInfoService', function() {
         {to:"background", relTabID:tabID, title:setTitle});
     }
 
-chrome.extension.onMessage.addListener(
-    function(request,sender,sendResponse) {
-        if (request.to == "background") {
-            activateLock(request.title, request.relTabID);
-        }
+    this.getCurrentTab = function(tabCallback) { 
+        chrome.tabs.query(
+            { currentWindow: true, active: true },
+            function (tabArray) { tabCallback(tabArray[0]); }
+        );
     }
+
+    chrome.extension.onMessage.addListener(
+        function(request,sender,sendResponse) {
+            if (request.to == "background") {
+                activateLock(request.title, request.relTabID);
+            }
+        }
 ) ;
     this.getTabsInfo = function(callback) {
         
@@ -77,6 +84,7 @@ chrome.extension.onMessage.addListener(
                 model.url = tabs[i].url;
                 model.favIconUrl = tabs[i].favIconUrl;
                 model.tabId = tabs[i].id;
+                
                 
                 chrome.tabs.sendMessage(tabs[i].id, { 'action': 'PageInfo' }, function (response) {
                     model.pageInfos = response;
@@ -98,12 +106,28 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     $scope.title = 'title';
     $scope.message = "TabToDo First demo";
 
+    
+   
     $scope.changeTabPage = function (tabId){
         tabsInfoService.changeTab(tabId);
 
     };
 
     $scope.closeTabPage = function (tabId, index){
+        // get current tab
+        // tabsInfoService.getCurrentTab(function (tab) {
+        //     if (tab.id = tabId)
+        //     {
+        //         // need to change tab.
+        //         // check if next tab is avialabe.
+        //         if ($scope.content[index +1]) {
+        //             $scope.changeTabPage($scope.content[index +1].tabId);
+        //         } else if ($scope.content[0]) {
+        //             $scope.changeTabPage($scope.content[0].tabId);
+        //         } // else no other tabs - so we will close as well
+        //     }
+        // });
+
         // remove from list
         $scope.content.splice(index,1);
         // close teh tab
@@ -218,6 +242,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                 }
 
                 $scope.content = tabsInfos;
+
                 $scope.$apply();
                 
             });    
@@ -257,8 +282,8 @@ myApp.directive('contentItem', function ($compile) {
     var datePicker= '<input type="text" size="8" ng-model="content.duetime" name="time" bs-timepicker data-time-format="HH:mm" data-length="1" data-minute-step="1" data-arrow-behavior="picker">';
     
 
-    var tabTemplate = '<li><span class="listItemButtons">'+ makeTaskButton +'</span>' + linkTabTemplate +'</li>';
-    var highlightedTabTemplate = '<li class="active"><span class="listItemButtons">'+ makeTaskButton + '</span>' + linkTabTemplate +'</li>';
+    var tabTemplate = '<li><span class="listItemButtons">'+ makeTaskButton + closeButton + '</span>' + linkTabTemplate +'</li>';
+    var highlightedTabTemplate = '<li class="active"><span class="listItemButtons">'+ makeTaskButton + closeButton + '</span>' + linkTabTemplate +'</li>';
     var openTaskTemplate = '<li class="task"><span class="listItemButtons">' + completeTaskButton + untaskButton +'</span>' + linkTabTemplate +'</li>';
     var completeTaskTemplate = '<li class="completeTask"><span class="listItemButtons">' + reopnTaskButton + closeButton + '</span>' + linkTabTemplate +'</li>';
 

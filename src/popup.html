@@ -9,6 +9,8 @@
         <script src="js/lib/angular.min.js"></script>
         <script src="js/lib/angular.ui.min.js"></script>
         
+        
+        
         <!--
         <script src="bower_components/angular/angular.js"></script>
         <script src="bower_components/angular-animate/angular-animate.js"></script>
@@ -35,7 +37,7 @@
             Search: <input ng-model="searchText">
 
             <div id='listsprites'>
-                <ul ng-model='content'>
+                <ul ui-sortable="sortableOptions" ng-model='content'>
                     <content-item ng-repeat="item in content | filter:searchText" content="item"
                     close-tab="closeTabPage(tabToChange, $index)" 
                     untask-tab="untaskTabPage(tabToChange, $index)"
