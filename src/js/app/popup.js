@@ -245,7 +245,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 
 myApp.directive('contentItem', function ($compile) {
 
-    var contentTitle = '<span ng-hide="content.editing">{{content.title}}<a ng-hide="content.editing" class="inline" href="#" ng-click="content.editing = true" title="rename tab"><img src="img/edit-icon.png" /></a></span><span ng-show="content.editing"><input ng-model="content.title" ng-enter="renameTab({tabToChange:content.tabId})"><a class="inline" href="#" ng-click="renameTab({tabToChange:content.tabId})">Done editing?</a></span>'
+    var contentTitle = '<span ng-hide="content.editing">{{content.title}}<a ng-hide="content.editing" class="inline" href="#" ng-click="content.editing = true" title="rename tab"><img src="img/edit-icon.png" /></a></span><span ng-show="content.editing"><input ng-model="content.title" ng-enter="renameTab({tabToChange:content.tabId}) style="vertical-align:middle;" /><a class="inline" href="#" ng-click="renameTab({tabToChange:content.tabId})">Done editing?</a></span>'
     var closeButton = '<span class="closeTab" ng-click="closeTab({tabToChange:content.tabId})" title="Close this tab"><img src="img/x.png" /> </span>';
     var untaskButton = '<span class="closeTab" ng-click="untaskTab({tabToChange:content.tabId})" title="un-task"><img src="img/undo-icon.png" /> </span>';
     var makeTaskButton = '<button class="btn btn-primary btn-small" ng-click="makeTask({tabToChange:content.tabId})">Make task</button>';

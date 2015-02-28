@@ -32,11 +32,11 @@
             <button ng-click="reload()">Reload</button>
             <button ng-click="testLoad()">testLoad</button>
             <button ng-click="testSave()">testSave</button> -->
-            <br />
+            Search: <input ng-model="searchText">
 
             <div id='listsprites'>
                 <ul ng-model='content'>
-                    <content-item ng-repeat="item in content" content="item"
+                    <content-item ng-repeat="item in content | filter:searchText" content="item"
                     close-tab="closeTabPage(tabToChange, $index)" 
                     untask-tab="untaskTabPage(tabToChange, $index)"
                     change-tab="changeTabPage(tabToChange)" 
