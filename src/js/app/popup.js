@@ -56,6 +56,10 @@ myApp.service('tabsInfoService', function() {
         {to:"background", relTabID:tabID, title:setTitle});
     }
 
+    this.moveTab = function(tabId, tabIndex) {
+        chrome.tabs.move(tabId, { index: tabIndex},  function () {})
+    }
+
     this.getCurrentTab = function(tabCallback) { 
         chrome.tabs.query(
             { currentWindow: true, active: true },
@@ -84,7 +88,7 @@ myApp.service('tabsInfoService', function() {
                 model.url = tabs[i].url;
                 model.favIconUrl = tabs[i].favIconUrl;
                 model.tabId = tabs[i].id;
-                
+                model.originalIndex = i;
                 
                 chrome.tabs.sendMessage(tabs[i].id, { 'action': 'PageInfo' }, function (response) {
                     model.pageInfos = response;
@@ -138,6 +142,13 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         // change state
         $scope.content[index] = changeState($scope.content[index], "openTask");
         saveTasksArray(index);
+        
+        // var element = $scope.content[index];
+        // $scope.content.splice(index, 1);
+        // $scope.content.splice(0, 0, element);
+        // tabsInfoService.moveTab(tabId, 0);
+
+        
     };
 
     //unTabPage
@@ -145,6 +156,15 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         // change state
         $scope.content[index] = changeState($scope.content[index], "tab");
         saveTasksArray(index);
+
+        //move logic
+        // var element = $scope.content[index];
+        // var originalIndex = element.originalIndex;
+        // $scope.content.splice(index, 1);
+        // $scope.content.splice(originalIndex, 0, element);
+        // tabsInfoService.moveTab(tabId, originalIndex);
+
+        
     };
 
     $scope.completeTaskPage = function (tabId, index){
@@ -185,6 +205,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                 model.url = tabItemModel.url;
                 model.favIconUrl = tabItemModel.favIconUrl;
                 model.tabId = tabItemModel.tabId;
+                model.originalIndex = tabItemModel.index;
             return model;
     };
 
