@@ -63,6 +63,11 @@ myApp.service('tabsInfoService', function() {
         );
     }
 
+    this.moveTab = function(tabId, newIndex) {
+        chrome.tabs.move(tabId, {index:newIndex}, function () {});
+
+    }
+
     chrome.extension.onMessage.addListener(
         function(request,sender,sendResponse) {
             if (request.to == "background") {
@@ -84,6 +89,7 @@ myApp.service('tabsInfoService', function() {
                 model.url = tabs[i].url;
                 model.favIconUrl = tabs[i].favIconUrl;
                 model.tabId = tabs[i].id;
+                model.i=i;
                 
                 
                 chrome.tabs.sendMessage(tabs[i].id, { 'action': 'PageInfo' }, function (response) {
@@ -107,6 +113,14 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     $scope.message = "TabToDo First demo";
 
     
+    $scope.sortableOptions = {
+    stop: function(e, ui) {
+      var item = ui.item.scope().item;
+      var fromIndex = ui.item.index();
+      console.log("moving id="+ item.tabId +", to index:"+ fromIndex);
+      tabsInfoService.moveTab(item.tabId, fromIndex);
+    }
+  };
    
     $scope.changeTabPage = function (tabId){
         tabsInfoService.changeTab(tabId);
@@ -282,10 +296,10 @@ myApp.directive('contentItem', function ($compile) {
     var datePicker= '<input type="text" size="8" ng-model="content.duetime" name="time" bs-timepicker data-time-format="HH:mm" data-length="1" data-minute-step="1" data-arrow-behavior="picker">';
     
 
-    var tabTemplate = '<li><span class="listItemButtons">'+ makeTaskButton + closeButton + '</span>' + linkTabTemplate +'</li>';
-    var highlightedTabTemplate = '<li class="active"><span class="listItemButtons">'+ makeTaskButton + closeButton + '</span>' + linkTabTemplate +'</li>';
-    var openTaskTemplate = '<li class="task"><span class="listItemButtons">' + completeTaskButton + untaskButton +'</span>' + linkTabTemplate +'</li>';
-    var completeTaskTemplate = '<li class="completeTask"><span class="listItemButtons">' + reopnTaskButton + closeButton + '</span>' + linkTabTemplate +'</li>';
+    var tabTemplate = '<span><span class="listItemButtons">'+ makeTaskButton + closeButton + '</span>' + linkTabTemplate +'</span>';
+    var highlightedTabTemplate = '<span class="active"><span class="listItemButtons">'+ makeTaskButton + closeButton + '</span>' + linkTabTemplate +'</span>';
+    var openTaskTemplate = '<span class="task"><span class="listItemButtons">' + completeTaskButton + untaskButton +'</span>' + linkTabTemplate +'</span>';
+    var completeTaskTemplate = '<span class="completeTask"><span class="listItemButtons">' + reopnTaskButton + closeButton + '</span>' + linkTabTemplate +'</span>';
 
     var getTemplate = function(contentType) {
         var template = '';
