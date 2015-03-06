@@ -1,7 +1,10 @@
 ﻿<!DOCTYPE html>
 <html ng-app="tabtodo" ng-csp>
     <head>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/popup.css">
+        <link rel="stylesheet" href="css/style.css">
         
         
         <script src="js/lib/jquery-1.8.2.min.js"></script>
@@ -25,23 +28,20 @@
         <script src="js/app/app.js"></script>
         <script src="js/app/popup.js"></script>
     </head>
-    <body id="container">
+    <body id="container" ng-controller="PageController">
         <header>
-            <h1>TabToDo</h1>
+        <div class="logo"></div>
+        <input ng-model="searchText" type="search" placeholder="search">
+            <div class="actions clearfix">
+                <button class="icon-feedback"></button>
+                <button class="icon-settings"></button>
+                <button class="icon-close"></button>
+            </div>
         </header>
-
-        <div ng-controller="PageController">
-
-        <!--
-            <button ng-click="reload()">Reload</button>
-            <button ng-click="testLoad()">testLoad</button>
-            <button ng-click="testSave()">testSave</button> -->
-            Search: <input ng-model="searchText">
-
-            <div id='listsprites'>
-                <ul ui-sortable="sortableOptions" ng-model='content'>
-                    <li ng-repeat="item in content | filter:searchText">
-                    <content-item  content="item"
+        <section>
+            <ul ui-sortable="sortableOptions" ng-model='content'>
+                
+                    <content-item class="tab" ng-repeat="item in content | filter:searchText" content="item"
                     close-tab="closeTabPage(tabToChange, $index)" 
                     untask-tab="untaskTabPage(tabToChange, $index)"
                     change-tab="changeTabPage(tabToChange)" 
@@ -50,10 +50,8 @@
                     change-due="changeDueTaskPage(tabToChange)"
                     rename-tab="renameTabPage(tabToChange, $index)" 
                     ></content-item>
-                    </li>
-                </ul>
-                </div>
-            </div>
-        </div>
+                
+            </ul>
+        </section>
     </body>
 </html>
