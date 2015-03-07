@@ -125,6 +125,13 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
       tabsInfoService.moveTab(item.tabId, fromIndex);
     }
   };
+
+   $scope.taskMouseOver = function(){
+        alert('here2');
+        $(this).find(".check_uncheck, img, p, input").toggleClass("Xplus48px");
+        $(this).find("p").toggleClass("width-minus-54px");
+        $(this).find("input").toggleClass("width-minus-54px");
+    };
    
     $scope.changeTabPage = function (tabId){
         tabsInfoService.changeTab(tabId);
@@ -306,28 +313,20 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 myApp.directive('contentItem', function ($compile) {
     var closeButton='';
     var contentTitle = '<span ng-hide="content.editing">{{content.title}}<a ng-hide="content.editing" class="inline" href="#" ng-click="content.editing = true" title="rename tab"><img src="img/edit-icon.png" /></a></span><span ng-show="content.editing"><input ng-model="content.title" ng-enter="renameTab({tabToChange:content.tabId}) style="vertical-align:middle;" /><a class="inline" href="#" ng-click="renameTab({tabToChange:content.tabId})">Done editing?</a></span>';
-    var untaskButton = '<span class="closeTab" ng-click="untaskTab({tabToChange:content.tabId})" title="un-task"><img src="img/undo-icon.png" /> </span>';
-    var makeTaskButton = '<button class="btn btn-primary btn-small" ng-click="makeTask({tabToChange:content.tabId})">Make task</button>';
-    var completeTaskButton = '<input type="checkbox" ng-click="completeTask({tabToChange:content.tabId})" title="Mark as Done" style="cursor:pointer; vertical-align:middle;">';
-    var reopnTaskButton = '<input type="checkbox" ng-click="makeTask({tabToChange:content.tabId})" checked title="Reopen task" style="cursor:pointer; vertical-align:middle;">';
-    //var linkTabTemplate = '<a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px; vertical-align:middle;" /></span><span class="listItemTitle" title={{content.title}} > {{content.title}}</span></a>'
-    var linkTabTemplate = '<a href="#" ng-click="changeTab({tabToChange:content.tabId})"><span class="listItemThumnail"><img ng-src={{content.favIconUrl}} style="height: 20px; vertical-align:middle;" /></span><span class="listItemTitle" title={{content.title}} >'+ contentTitle+'</span></a>';
-    //var datePicker= '<timepicker ng-model="content.duetime" ng-change="changeDue({tabToChange:content.duetime})"></timepicker>';
-    var datePicker= '<input type="text" size="8" ng-model="content.duetime" name="time" bs-timepicker data-time-format="HH:mm" data-length="1" data-minute-step="1" data-arrow-behavior="picker">';
     
-    var highlightedTabTemplate = '<span class="active"><span class="listItemButtons">'+ makeTaskButton + closeButton + '</span>' + linkTabTemplate +'</span>';
-    var completeTaskTemplate = '<span class="completeTask"><span class="listItemButtons">' + reopnTaskButton + closeButton + '</span>' + linkTabTemplate +'</span>';
 
-    var addTaskButton = '<button class="add icon-add" ng-click="makeTask({tabToChange:content.tabId})"></button>'
+    var undoTaskButton= '<button class="add icon-return" ng-click="untaskTab({tabToChange:content.tabId})"></button>';
+    var addTaskButton = '<button class="add icon-add" ng-click="makeTask({tabToChange:content.tabId})"></button>';
     var closeButton = '<button class="close icon-close" ng-click="closeTab({tabToChange:content.tabId})"></button>';
-    var editNameButton = '<button class="edit icon-edit" ng-click="content.editing = true"></button>';
+    var editNameButton = '<button class="edit icon-edit"></button><button class="edit icon-tick none" ng-click="renameTab({tabToChange:content.tabId})"></button>';
 
-    var tabLink = '<span ng-click="changeTab({tabToChange:content.tabId})"><span><img ng-src="{{content.favIconUrl}}" class="tab_favicon" alt=""></span><span><p ng-hide="content.editing" class="tab_link">{{content.title}}</p><input ng-show="content.editing" ng-model="content.title" ng-enter="renameTab({tabToChange:content.tabId})" class="tab_link_rename" type="text" placeholder="{{content.title}}" autofocus></span></span>';
+    var tabLink = '<span ng-click="changeTab({tabToChange:content.tabId})"><span><img ng-src="{{content.favIconUrl}}" class="tab_favicon" alt=""></span><span><p class="tab_link">{{content.title}}</p><input ng-model="content.title" ng-enter="renameTab({tabToChange:content.tabId})" class="tab_link_rename" type="text" placeholder="{{content.title}}" autofocus></span></span>';
     var tabActions = '<span class="tab_actions">' + closeButton +editNameButton + addTaskButton+'</span>';
-    var taskTabActions = '<span class="tab_actions">' + closeButton +editNameButton +'</span>';
+    var taskTabActions = '<span class="tab_actions tasked">' + closeButton +editNameButton + undoTaskButton+'</span>';
 
     var tabTemplate = tabLink + tabActions;
-    var taskTempalte = '<span class="check_uncheck Xplus6px"><button class="uncheck icon-tick"></button><div class="check"></div></span>'+tabLink + taskTabActions;
+    var taskTempalte = '<span class="check_uncheck Xplus6px"><button class="uncheck icon-tick"></button><div class="check"  ng-click="completeTask({tabToChange:content.tabId})"></div></span>'+tabLink + taskTabActions;
+    var completeTempalte = '<span class="check_uncheck Xplus6px check_background"><button class="uncheck icon-tick visible"></button><div class="check hidden" ng-click="makeTask({tabToChange:content.tabId})"></div></span>'+tabLink + taskTabActions;
     
     var getTemplate = function(contentType) {
         var template = '';
@@ -336,14 +335,11 @@ myApp.directive('contentItem', function ($compile) {
             case 'tab':
                 template = tabTemplate;
                 break;
-            case 'highlightedTab':
-                templte = highlightedTabTemplate;
-                break;
             case 'openTask':
                 template = taskTempalte;
                 break;
             case 'completeTask':
-                template = completeTaskTemplate;
+                template = completeTempalte;
                 break;
         }
 
@@ -356,7 +352,43 @@ myApp.directive('contentItem', function ($compile) {
         
         $compile(element.contents())(scope);
 
-        
+        element.on('mouseenter', function() {
+            if ($(this).find(".tab_actions").hasClass("tasked")) {
+                    $(this).find(".check_uncheck, img, p, input").toggleClass("Xplus48px");
+                    $(this).find("p").toggleClass("width-minus-54px");
+                    $(this).find("input").toggleClass("width-minus-54px");
+                }
+
+            });
+
+        element.on('mouseleave', function() {
+                
+                if ($(this).find(".tab_actions").hasClass("tasked")) {
+                    $(this).find(".check_uncheck, img, p").toggleClass("Xplus48px");
+                    $(this).find("p").toggleClass("width-minus-54px");
+                }
+            });
+
+         $(".edit").click(function () {
+            $(this).parent().find(".add").toggleClass("none");
+            
+            // this
+            $(this).parent().find(".icon-edit").toggleClass("none");
+            $(this).parent().find(".icon-tick").toggleClass("none");
+            //$(this).parent().find(".close").toggleClass("icon-return");
+    
+            $(this).parent().parent().find("input").toggleClass("block");
+            $(this).parent().parent().find("input").toggleClass("width358px");
+            $(this).parent().parent().find(".tab_actions").toggleClass("width72px");
+            $(this).parent().parent().find("p").toggleClass("none");
+        }); 
+
+        /*
+        $(".check_uncheck").click(function () {
+            $(this).find(".check").toggleClass("hidden");
+            $(this).find(".uncheck").toggleClass("visible");
+            $(this).toggleClass("check_background");
+        });*/
     }
 
      return {
