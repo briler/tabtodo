@@ -119,10 +119,11 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     
     $scope.sortableOptions = {
     stop: function(e, ui) {
+        debugger;
       var item = ui.item.scope().item;
-      var fromIndex = ui.item.index();
-      console.log("moving id="+ item.tabId +", to index:"+ fromIndex);
-      tabsInfoService.moveTab(item.tabId, fromIndex);
+      var toIndex = ui.item.index();
+      console.log("moving id="+ item.tabId +", to index:"+ toIndex);
+      tabsInfoService.moveTab(item.tabId, toIndex);
     }
   };
 

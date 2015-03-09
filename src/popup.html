@@ -7,11 +7,11 @@
         <link rel="stylesheet" href="css/style.css">
         
         
-        <script src="js/lib/jquery-1.8.2.min.js"></script>
+        <!--<script src="js/lib/jquery-1.8.2.min.js"></script>
         <script src="js/lib/jquery-ui.min.js"></script>
         <script src="js/lib/angular.min.js"></script>
-        <script src="js/lib/angular.ui.min.js"></script>
-        <!--<script src="js/lib/jqueryandangular.min.js"></script>-->
+        <script src="js/lib/angular.ui.min.js"></script>-->
+        <script src="js/lib/jqueryandangular.min.js"></script>
         
         
         
@@ -41,7 +41,7 @@
         <section>
             <ul ui-sortable="sortableOptions" ng-model='content'>
                 
-                    <content-item class="tab" ng-repeat="item in content | filter:searchText" content="item"
+                    <content-item class="tab sortable" ng-repeat="item in content | filter:searchText" content="item"
                     close-tab="closeTabPage(tabToChange, $index)" 
                     untask-tab="untaskTabPage(tabToChange, $index)"
                     change-tab="changeTabPage(tabToChange)" 
