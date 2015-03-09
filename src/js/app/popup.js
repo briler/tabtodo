@@ -94,7 +94,7 @@ myApp.service('tabsInfoService', function() {
                 model.favIconUrl = tabs[i].favIconUrl;
                 model.tabId = tabs[i].id;
                 model.originalIndex = i;
-
+                model.editing = false;
                 
                 chrome.tabs.sendMessage(tabs[i].id, { 'action': 'PageInfo' }, function (response) {
                     model.pageInfos = response;
@@ -195,7 +195,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     };
 
     $scope.renameTabPage = function (tabId, index) {
-        debugger;
+        
         $scope.content[index].editing = false;
 
         if ($scope.tasksArray[''+$scope.content[index].tabId])
@@ -312,17 +312,16 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 
 myApp.directive('contentItem', function ($compile) {
     var closeButton='';
-    var contentTitle = '<span ng-hide="content.editing">{{content.title}}<a ng-hide="content.editing" class="inline" href="#" ng-click="content.editing = true" title="rename tab"><img src="img/edit-icon.png" /></a></span><span ng-show="content.editing"><input ng-model="content.title" ng-enter="renameTab({tabToChange:content.tabId}) style="vertical-align:middle;" /><a class="inline" href="#" ng-click="renameTab({tabToChange:content.tabId})">Done editing?</a></span>';
     
-
-    var undoTaskButton= '<button class="add icon-return" ng-click="untaskTab({tabToChange:content.tabId})"></button>';
-    var addTaskButton = '<button class="add icon-add" ng-click="makeTask({tabToChange:content.tabId})"></button>';
+    var undoTaskButton= '<button ng-hide="editing" class="add icon-return" ng-click="untaskTab({tabToChange:content.tabId})"></button>';
+    var addTaskButton = '<button ng-hide="editing" class="add icon-add" ng-click="makeTask({tabToChange:content.tabId})"></button>';
     var closeButton = '<button class="close icon-close" ng-click="closeTab({tabToChange:content.tabId})"></button>';
-    var editNameButton = '<button class="edit icon-edit"></button><button class="edit icon-tick none" ng-click="renameTab({tabToChange:content.tabId})"></button>';
+    //var editNameButton = '<button class="edit icon-edit"></button><button class="edit icon-tick none" ng-click="renameTab({tabToChange:content.tabId})"></button>';
+    var editNameButton = '<button ng-class="{\'edit icon-edit none\' : editing , \'edit icon-edit\' : !editing}" ng-click="editing = true"></button><button ng-class="{\'edit icon-tick\' : editing, \'edit icon-tick none\' : !editing}" ng-click="editing = false ; renameTab({tabToChange:content.tabId})"></button>';
 
-    var tabLink = '<span ng-click="changeTab({tabToChange:content.tabId})"><span><img ng-src="{{content.favIconUrl}}" class="tab_favicon" alt=""></span><span><p class="tab_link">{{content.title}}</p><input ng-model="content.title" ng-enter="renameTab({tabToChange:content.tabId})" class="tab_link_rename" type="text" placeholder="{{content.title}}" autofocus></span></span>';
-    var tabActions = '<span class="tab_actions">' + closeButton +editNameButton + addTaskButton+'</span>';
-    var taskTabActions = '<span class="tab_actions tasked">' + closeButton +editNameButton + undoTaskButton+'</span>';
+    var tabLink = '<span ng-click="changeTab({tabToChange:content.tabId})"><span><img ng-src="{{content.favIconUrl}}" class="tab_favicon" alt=""></span><span><p ng-hide="editing" class="tab_link">{{content.title}}</p><input ng-model="content.title" ng-enter="editing = false ; renameTab({tabToChange:content.tabId})" ng-class="{\'tab_link_rename width358px block\' : editing, \'tab_link_rename\' : !editing }" type="text" placeholder="{{content.title}}" focus-me="editing" autofocus></span></span>';
+    var tabActions = '<span ng-class="{\'tab_actions\' : !editing, \'tab_actions width72px\' : editing} ">' + closeButton +editNameButton + addTaskButton+'</span>';
+    var taskTabActions = '<span ng-class="{\'tab_actions tasked\' : !editing, \'tab_actions tasked width72px\' : editing} ">' + closeButton +editNameButton + undoTaskButton+'</span>';
 
     var tabTemplate = tabLink + tabActions;
     var taskTempalte = '<span class="check_uncheck Xplus6px"><button class="uncheck icon-tick"></button><div class="check"  ng-click="completeTask({tabToChange:content.tabId})"></div></span>'+tabLink + taskTabActions;
@@ -369,18 +368,17 @@ myApp.directive('contentItem', function ($compile) {
                 }
             });
 
+        element.bind('click', function(event){
+            if ($(this).hasClass(".edit"))
+            {
+
+            }
+        });
+
          $(".edit").click(function () {
-            $(this).parent().find(".add").toggleClass("none");
-            
-            // this
-            $(this).parent().find(".icon-edit").toggleClass("none");
-            $(this).parent().find(".icon-tick").toggleClass("none");
-            //$(this).parent().find(".close").toggleClass("icon-return");
-    
-            $(this).parent().parent().find("input").toggleClass("block");
-            $(this).parent().parent().find("input").toggleClass("width358px");
-            $(this).parent().parent().find(".tab_actions").toggleClass("width72px");
-            $(this).parent().parent().find("p").toggleClass("none");
+            if ($(this).parent().parent().find("p").hasClass("none"))
+                $(this).parent().parent().find("input").focus();
+
         }); 
 
         /*
@@ -422,6 +420,29 @@ myApp.directive('ngEnter', function () {
             }
         });
     };
+});
+
+myApp.directive('focusMe', function($timeout, $parse) {
+  return {
+    //scope: true,   // optionally create a child scope
+    link: function(scope, element, attrs) {
+      var model = $parse(attrs.focusMe);
+      scope.$watch(model, function(value) {
+        console.log('value=',value);
+        if(value === true) { 
+          $timeout(function() {
+            element[0].focus(); 
+          });
+        }
+      });
+      // to address @blesh's comment, set attribute value to 'false'
+      // on blur event:
+      element.bind('blur', function() {
+         console.log('blur');
+         scope.$apply(model.assign(scope, false));
+      });
+    }
+  };
 });
 
 
