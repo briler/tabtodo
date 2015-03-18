@@ -92,6 +92,12 @@ myApp.service('tabsInfoService', function() {
                 model.title = tabs[i].title;
                 model.url = tabs[i].url;
                 model.favIconUrl = tabs[i].favIconUrl;
+                //console.log("faviconis: "+tabs[i].favIconUrl);
+                if (model.favIconUrl === "")
+                {
+                    // use our default image
+                    model.favIconUrl = '../img/ok-icon.png';
+                }
                 model.tabId = tabs[i].id;
                 model.originalIndex = i;
                 model.editing = false;
@@ -113,8 +119,8 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     $scope.tasksArray = [];
         
     $scope.editorEnabled = false;
-    $scope.title = 'title';
-    $scope.message = "TabToDo First demo";
+  
+  
 
     
     $scope.sortableOptions = {
@@ -127,12 +133,6 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     }
   };
 
-   $scope.taskMouseOver = function(){
-        alert('here2');
-        $(this).find(".check_uncheck, img, p, input").toggleClass("Xplus48px");
-        $(this).find("p").toggleClass("width-minus-54px");
-        $(this).find("input").toggleClass("width-minus-54px");
-    };
    
     $scope.changeTabPage = function (tabId){
         tabsInfoService.changeTab(tabId);
@@ -266,6 +266,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
             tabsInfoService.getTabsInfo(function (tabsInfos) {
                 if (tasksArray)
                 {
+                    var newTaskArray = [];
                     var found=false;
                     for (var i=0;i<tabsInfos.length;i++) {
                         
@@ -274,12 +275,14 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                              console.log("found tab in stroage array");
                              console.log(tasksArray[tabId]);
                              tabsInfos[i] = tasksArray[tabId];
+                             // we regenrate the task array inorder to remove old closed tabs
+                             newTaskArray[tabId] = tasksArray[tabId];
                              found = true;
                          }
                     }
 
                     if (found)
-                       $scope.tasksArray =  tasksArray;
+                       $scope.tasksArray =  newTaskArray;
                     else
                        $scope.tasksArray = [];
                 }
@@ -412,7 +415,6 @@ myApp.directive('focusMe', function($timeout, $parse) {
     link: function(scope, element, attrs) {
       var model = $parse(attrs.focusMe);
       scope.$watch(model, function(value) {
-        console.log('value=',value);
         if(value === true) { 
           $timeout(function() {
             element[0].focus(); 
@@ -422,7 +424,6 @@ myApp.directive('focusMe', function($timeout, $parse) {
       // to address @blesh's comment, set attribute value to 'false'
       // on blur event:
       element.bind('blur', function() {
-         console.log('blur');
          scope.$apply(model.assign(scope, false));
       });
     }

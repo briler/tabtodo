@@ -40,7 +40,6 @@
         </header>
         <section>
             <ul ui-sortable="sortableOptions" ng-model='content'>
-                
                     <content-item class="tab" ng-repeat="item in content | filter:searchText" content="item"
                     close-tab="closeTabPage(tabToChange, $index)" 
                     untask-tab="untaskTabPage(tabToChange, $index)"
@@ -50,6 +49,9 @@
                     change-due="changeDueTaskPage(tabToChange)"
                     rename-tab="renameTabPage(tabToChange, $index)" 
                     ></content-item>
+            </ul>
+            <ul>
+            
             </ul>
         </section>
 
