@@ -16,6 +16,9 @@ input ,button, .check, {
 	-webkit-transition: -webkit-transform 0.2s;
 }	
 
+.line-through {
+	text-decoration: line-through;
+}
 .check_uncheck, 
 .tab_favicon, .tab_link	{
 	cursor: pointer;
@@ -277,5 +280,23 @@ input[type=search] {
 
 .width358px {
 	width: 358px;
+}
+
+.closedTabs {
+	  border-top: 1px solid #efefef;
+}
+
+.no-cursor {
+  cursor: default !important;
+}
+.closed-tasks-title {
+
+  float: right;
+  width: auto;
+  height: auto;
+  background: none;
+  color: #a3a3a3;
+  font-size: 11px;
+  margin-right: 20px;
 }
 

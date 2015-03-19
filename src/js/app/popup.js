@@ -29,10 +29,27 @@ myApp.service('tabsStorageService', function () {
         });
     }
 
+    this.saveClosedTasks = function (tabsList) {
+        chrome.storage.sync.set({'closedTabsList': tabsList}, function() {
+          // Notify that we saved.
+          //message('Settings saved');
+        });
+    }
+    
+
     this.getTabs = function (callback){
         chrome.storage.sync.get('tabsList', function (value) {
             if (value && value.tabsList)
                 callback(value.tabsList);
+            callback(null);
+        })
+
+    }
+
+    this.getClosedTabs = function (callback){
+        chrome.storage.sync.get('closedTabsList', function (value) {
+            if (value && value.closedTabsList)
+                callback(value.closedTabsList);
             callback(null);
         })
 
@@ -96,7 +113,7 @@ myApp.service('tabsInfoService', function() {
                 if (model.favIconUrl === "")
                 {
                     // use our default image
-                    model.favIconUrl = '../img/ok-icon.png';
+                    model.favIconUrl = 'http://tabtodo.com/images/tabtodo.png';
                 }
                 model.tabId = tabs[i].id;
                 model.originalIndex = i;
@@ -117,7 +134,8 @@ myApp.service('tabsInfoService', function() {
 myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoService, tabsStorageService) {
 
     $scope.tasksArray = [];
-        
+    $scope.closedTabArray = [];
+    $scope.hasClosedTabs = false;
     $scope.editorEnabled = false;
   
   
@@ -128,7 +146,6 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         debugger;
       var item = ui.item.scope().item;
       var toIndex = ui.item.index();
-      console.log("moving id="+ item.tabId +", to index:"+ toIndex);
       tabsInfoService.moveTab(item.tabId, toIndex);
     }
   };
@@ -140,19 +157,18 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     };
 
     $scope.closeTabPage = function (tabId, index){
-        // get current tab
-        // tabsInfoService.getCurrentTab(function (tab) {
-        //     if (tab.id = tabId)
-        //     {
-        //         // need to change tab.
-        //         // check if next tab is avialabe.
-        //         if ($scope.content[index +1]) {
-        //             $scope.changeTabPage($scope.content[index +1].tabId);
-        //         } else if ($scope.content[0]) {
-        //             $scope.changeTabPage($scope.content[0].tabId);
-        //         } // else no other tabs - so we will close as well
-        //     }
-        // });
+        
+        // check if completed task.
+        if ($scope.content[index].type == 'completeTask')
+        {
+            //86400000
+            var task = $scope.content[index];
+            task.closedDate = Date.now();
+
+            $scope.closedTabArray.push(task);    
+            saveClosedTasks();
+            $scope.hasClosedTabs = true;
+        }
 
         // remove from list
         $scope.content.splice(index,1);
@@ -218,6 +234,10 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         $scope.tasksArray[''+$scope.content[index].tabId] = $scope.content[index];
         
         tabsStorageService.saveTabs($scope.tasksArray);
+    }
+
+    function saveClosedTasks(){
+        tabsStorageService.saveClosedTasks($scope.closedTabArray);
     }
 
     function changeState(tabItemModel, newState){
@@ -293,8 +313,28 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                 
             });    
         });
+        
+        // get Closed tabs
+        tabsStorageService.getClosedTabs(function (closedTabsInfos) {
+            var tasksArray;
+            debugger;
+             if (closedTabsInfos){
+                 tasksArray = closedTabsInfos;
+                  //86400000
+                var dayBeforeTime = Date.now() - 86400000 ;  // todo change according to config
+
+                for (var i=0;i<tasksArray.length;i++) {
+                    if (tasksArray[i].closedDate > dayBeforeTime) {
+                        $scope.closedTabArray.push(tasksArray[i])
+                        $scope.hasClosedTabs = true;
+                    }        
+                }
+
+            }
+        });
 
     };
+
     $scope.getTabsInfo = (function () {
         // We get tasks info from storage.
         
@@ -317,7 +357,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 myApp.directive('contentItem', function ($compile) {
     var closeButton='';
     
-    var undoTaskButton= '<button  ng-class="{\'add icon-return\' : !editing, \'add icon-return none\' : editing}" ng-click="untaskTab({tabToChange:content.tabId})"></button>';
+    var undoTaskButton= '<button  ng-class="{\'add icon-return\' : !editing, \'add icon-return none\' : editing}" title="Add Remove Task" ng-click="untaskTab({tabToChange:content.tabId})"></button>';
     var addTaskButton = '<button ng-class="{\'add icon-add\' : !editing, \'add icon-add none\' : editing}" ng-click="makeTask({tabToChange:content.tabId})"></button>';
     var closeButton = '<button class="close icon-close" ng-click="closeTab({tabToChange:content.tabId})"></button>';
     //var editNameButton = '<button class="edit icon-edit"></button><button class="edit icon-tick none" ng-click="renameTab({tabToChange:content.tabId})"></button>';
@@ -342,6 +382,9 @@ myApp.directive('contentItem', function ($compile) {
                 template = taskTempalte;
                 break;
             case 'completeTask':
+                template = completeTempalte;
+                break;
+            case 'closedCompleteTask':
                 template = completeTempalte;
                 break;
         }
