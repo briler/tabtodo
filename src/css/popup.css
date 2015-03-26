@@ -300,3 +300,27 @@ input[type=search] {
   margin-right: 20px;
 }
 
+.settings-tab {
+	  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  line-height: 24px;
+  font-size: 14px;
+  margin-left: 8px;
+  padding-right: 8px;
+  height: 24px;
+  width: 430px;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+.settings-tab-info {
+  font-size: 13px;
+}
+
+.settings-input {
+	vertical-align: middle;	
+	float: none;
+}

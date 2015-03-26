@@ -89,13 +89,19 @@ myApp.service('tabsInfoService', function() {
 
     }
 
+    this.createTab = function(tabUrl) {
+        chrome.tabs.create({ url : tabUrl }, function () {});
+    }
+
     chrome.extension.onMessage.addListener(
         function(request,sender,sendResponse) {
             if (request.to == "background") {
                 activateLock(request.title, request.relTabID);
             }
         }
-) ;
+    );
+
+
     this.getTabsInfo = function(callback) {
         
         var reponseArray = [];
@@ -175,6 +181,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         // close teh tab
         tabsInfoService.closeTab(tabId);
     };
+
 
     $scope.makeTaskPage = function (tabId, index){
         // change state
@@ -275,6 +282,21 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         //};
     }
 
+    $scope.clearCompletedTask = function(index) {
+        $scope.closedTabArray.splice(index, 1);
+        saveClosedTasks();
+        if ($scope.closedTabArray.length == 0)
+        {
+            $scope.hasClosedTabs = false;
+        }
+    }
+
+    $scope.reopenClosedTab = function(index, completedTask) {
+        
+        $scope.clearCompletedTask(index);
+        tabsInfoService.createTab(completedTask.url);
+
+    }
 
     $scope.reload = function () {
       //  alert('reload');
@@ -357,19 +379,19 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 myApp.directive('contentItem', function ($compile) {
     var closeButton='';
     
-    var undoTaskButton= '<button  ng-class="{\'add icon-return\' : !editing, \'add icon-return none\' : editing}" title="Add Remove Task" ng-click="untaskTab({tabToChange:content.tabId})"></button>';
-    var addTaskButton = '<button ng-class="{\'add icon-add\' : !editing, \'add icon-add none\' : editing}" ng-click="makeTask({tabToChange:content.tabId})"></button>';
-    var closeButton = '<button class="close icon-close" ng-click="closeTab({tabToChange:content.tabId})"></button>';
+    var undoTaskButton= '<button  ng-class="{\'add icon-return\' : !editing, \'add icon-return none\' : editing}" title="Un-Task" ng-click="untaskTab({tabToChange:content.tabId})"></button>';
+    var addTaskButton = '<button ng-class="{\'add icon-add\' : !editing, \'add icon-add none\' : editing}" title="Add a Task" ng-click="makeTask({tabToChange:content.tabId})"></button>';
+    var closeButton = '<button class="close icon-close" ng-click="closeTab({tabToChange:content.tabId})" title="Close Tab"></button>';
     //var editNameButton = '<button class="edit icon-edit"></button><button class="edit icon-tick none" ng-click="renameTab({tabToChange:content.tabId})"></button>';
-    var editNameButton = '<button ng-class="{\'edit icon-edit none\' : editing , \'edit icon-edit\' : !editing}" ng-click="editing = true"></button><button ng-class="{\'edit icon-tick\' : editing, \'edit icon-tick none\' : !editing}" ng-click="editing = false ; renameTab({tabToChange:content.tabId})"></button>';
+    var editNameButton = '<button ng-class="{\'edit icon-edit none\' : editing , \'edit icon-edit\' : !editing}" ng-click="editing = true" title = "Rename Tab"></button><button ng-class="{\'edit icon-tick\' : editing, \'edit icon-tick none\' : !editing}" ng-click="editing = false ; renameTab({tabToChange:content.tabId})" title="Done"></button>';
 
     var tabLink = '<span ng-click="changeTab({tabToChange:content.tabId})"><span><img ng-src="{{content.favIconUrl}}" class="tab_favicon" alt=""></span><span><span ng-class="{\'none\' : editing}"><p class="tab_link">{{content.title}}</p></span><input ng-model="content.title" ng-enter="editing = false ; renameTab({tabToChange:content.tabId})" ng-class="{\'tab_link_rename block width358px\' : editing, \'tab_link_rename\' : !editing }" type="text" placeholder="{{content.title}}" focus-me="editing" autofocus></span></span>';
     var tabActions = '<span ng-class="{\'tab_actions\' : !editing, \'tab_actions width72px\' : editing} ">' + closeButton +editNameButton + addTaskButton+'</span>';
     var taskTabActions = '<span ng-class="{\'tab_actions tasked\' : !editing, \'tab_actions tasked width72px\' : editing} ">' + closeButton +editNameButton + undoTaskButton+'</span>';
 
     var tabTemplate = tabLink + tabActions;
-    var taskTempalte = '<span class="check_uncheck Xplus6px"><button class="uncheck icon-tick"></button><div class="check"  ng-click="completeTask({tabToChange:content.tabId})"></div></span>'+tabLink + taskTabActions;
-    var completeTempalte = '<span class="check_uncheck Xplus6px check_background"><button class="uncheck icon-tick visible"></button><div class="check hidden" ng-click="makeTask({tabToChange:content.tabId})"></div></span>'+tabLink + taskTabActions;
+    var taskTempalte = '<span class="check_uncheck Xplus6px"><button class="uncheck icon-tick"></button><div class="check"  ng-click="completeTask({tabToChange:content.tabId})" title="Complete Task"></div></span>'+tabLink + taskTabActions;
+    var completeTempalte = '<span class="check_uncheck Xplus6px check_background"><button class="uncheck icon-tick visible"></button><div class="check hidden" ng-click="makeTask({tabToChange:content.tabId})" title="Reopen"></div></span>'+tabLink + taskTabActions;
     
     var getTemplate = function(contentType) {
         var template = '';
@@ -474,6 +496,16 @@ myApp.directive('focusMe', function($timeout, $parse) {
 });
 
 
+
+
+
+myApp.controller("MgmController", function ($scope, ngDialog) {
+    $scope.openSettings = function () {
+        ngDialog.open({ 
+            template: 'settings.html', 
+            className: 'ngdialog-theme-plain'});
+    };
+});
 
 
 
