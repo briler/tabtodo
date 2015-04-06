@@ -22,11 +22,28 @@ myApp.service('pageInfoService', function() {
 
 
 myApp.service('tabsStorageService', function () {
+    
+    this.getTabs = function (callback){
+        chrome.storage.sync.get('tabsList', function (value) {
+            if (value && value.tabsList)
+                callback(value.tabsList);
+            callback(null);
+        })
+
+    }
     this.saveTabs = function (tabsList) {
         chrome.storage.sync.set({'tabsList': tabsList}, function() {
           // Notify that we saved.
           //message('Settings saved');
         });
+    }
+
+    this.getClosedTabs = function (callback){
+        chrome.storage.sync.get('closedTabsList', function (value) {
+            if (value && value.closedTabsList)
+                callback(value.closedTabsList);
+            callback(null);
+        })
     }
 
     this.saveClosedTasks = function (tabsList) {
@@ -36,27 +53,39 @@ myApp.service('tabsStorageService', function () {
         });
     }
     
-
-    this.getTabs = function (callback){
-        chrome.storage.sync.get('tabsList', function (value) {
-            if (value && value.tabsList)
-                callback(value.tabsList);
-            callback(null);
+    this.getSettings = function (callback) {
+        chrome.storage.sync.get('tabtodoSettings' , function (value) {
+          if (value && value.tabtodoSettings)
+                callback(value.tabtodoSettings);
+            callback(null);  
         })
-
     }
 
-    this.getClosedTabs = function (callback){
-        chrome.storage.sync.get('closedTabsList', function (value) {
-            if (value && value.closedTabsList)
-                callback(value.closedTabsList);
-            callback(null);
-        })
-
+    this.saveSettings = function (tabtodoSettings) {
+        chrome.storage.sync.set({'tabtodoSettings': tabtodoSettings}, function() {
+          // Notify that we saved.
+          //message('Settings saved');
+        });
     }
 
 });
 
+myApp.service('settingsService', ['tabsStorageService' ,function (tabsStorageService) {
+    var settings = [];
+    this.init = function () {
+        tabsStorageService.getSettings(function (settingsCallback) {
+            if (settingsCallback) {
+                settings = settingsCallback;
+            }
+            else { // set defaultvalues
+                settings.push('autoCloseCompletedTask', false);
+            }
+        });
+    }
+
+    this.get
+
+}]);
 
 myApp.service('tabsInfoService', function() {
 
