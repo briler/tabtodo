@@ -39,15 +39,15 @@ myApp.service('tabsStorageService', function () {
     }
 
     this.getClosedTabs = function (callback){
-        chrome.storage.sync.get('closedTabsList', function (value) {
-            if (value && value.closedTabsList)
-                callback(value.closedTabsList);
+        chrome.storage.sync.get('closedTabsList2', function (value) {
+            if (value && value.closedTabsList2)
+                callback(value.closedTabsList2);
             callback(null);
         })
     }
 
     this.saveClosedTasks = function (tabsList) {
-        chrome.storage.sync.set({'closedTabsList': tabsList}, function() {
+        chrome.storage.sync.set({'closedTabsList2': tabsList}, function() {
           // Notify that we saved.
           //message('Settings saved');
         });
@@ -244,6 +244,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     $scope.completeTaskPage = function (tabId, index){
         // change state
         $scope.content[index] = changeState($scope.content[index], "completeTask");
+        $scope.content[index].closedDate = Date.now();
         saveTasksArray(index);
     };
 
@@ -352,10 +353,26 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                          }
                     }
 
+                     tasksArray.forEach(function (task) {
+                        if (task && !newTaskArray[task.tabId]) {
+                            console.log("found completed task to show");
+                            console.log(task);
+                       
+                            if (!IsExistsInListTab($scope.closedTabArray, task.tabId)) {
+                                $scope.closedTabArray.push(task);
+                                $scope.hasClosedTabs = true;
+                                saveClosedTasks();
+
+                            }
+                        }
+                     });
+
                     if (found)
                        $scope.tasksArray =  newTaskArray;
                     else
                        $scope.tasksArray = [];
+
+
                 }
 
                 $scope.content = tabsInfos;
@@ -365,7 +382,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
             });    
         });
         
-        // get Closed tabs
+           // get Closed tabs
         tabsStorageService.getClosedTabs(function (closedTabsInfos) {
             var tasksArray;
             debugger;
@@ -375,14 +392,17 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                 var dayBeforeTime = Date.now() - 86400000 ;  // todo change according to config
 
                 for (var i=0;i<tasksArray.length;i++) {
+                    var tabId = tasksArray[i].tabId;
                     if (tasksArray[i].closedDate > dayBeforeTime) {
-                        $scope.closedTabArray.push(tasksArray[i])
+                        $scope.closedTabArray.push(tasksArray[i]);
+                        //$scope.closedTabArray[''+tasksArray[i].tabId]= tasksArray[i];
                         $scope.hasClosedTabs = true;
                     }        
                 }
 
             }
         });
+       
 
     };
 
@@ -402,6 +422,19 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                 return items[i];
         }
     }
+
+    function IsExistsInListTab(list,tabId) {
+        //search array for key
+        if (list)
+        {
+            for(var i = 0; i < list.length; ++i) {
+                //if the name is what we are looking for return it
+                if(list[i] && list[i].tabId === tabId)
+                    return true;
+            }
+        }
+        return false;
+    };
    
 });
 

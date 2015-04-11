@@ -14,6 +14,8 @@
         <script src="js/lib/angular-strap.tpl.min.js"></script>
         <script src="js/app/app.js"></script>
         <script src="js/app/popup.js"></script>
+
+
     </head>
     <body id="container" >
         <header>
@@ -26,6 +28,10 @@
             </div>
         </header>
         <section  ng-controller="PageController">
+            <div class="actions clearfix">
+                    <button class="icon-feedback" onClick="getTabsInfo()"></button>
+              
+                </div>
             <ul ui-sortable="sortableOptions" ng-model='content'>
                     <content-item class="tab" ng-repeat="item in content | filter:searchText" content="item"
                     close-tab="closeTabPage(tabToChange, $index)" 
@@ -50,6 +56,8 @@
                     </span>
                 </li>
             </ul>
+           
+
         </section>
 
     </body>

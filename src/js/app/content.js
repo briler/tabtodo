@@ -3,7 +3,7 @@
 chrome.extension.onMessage.addListener(
 function (request, sender, sendResponse) {
 
-    debugger;
+  //  debugger;
 
 
     // if (request.action == 'PageInfo') {
