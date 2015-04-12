@@ -27,6 +27,7 @@ myApp.service('tabsStorageService', function () {
         chrome.storage.sync.get('tabsList', function (value) {
             if (value && value.tabsList)
                 callback(value.tabsList);
+            else
             callback(null);
         })
 
@@ -42,7 +43,8 @@ myApp.service('tabsStorageService', function () {
         chrome.storage.sync.get('closedTabsList2', function (value) {
             if (value && value.closedTabsList2)
                 callback(value.closedTabsList2);
-            callback(null);
+            else
+                callback(null);
         })
     }
 
@@ -57,6 +59,7 @@ myApp.service('tabsStorageService', function () {
         chrome.storage.sync.get('tabtodoSettings' , function (value) {
           if (value && value.tabtodoSettings)
                 callback(value.tabtodoSettings);
+            else
             callback(null);  
         })
     }
@@ -71,20 +74,38 @@ myApp.service('tabsStorageService', function () {
 });
 
 myApp.service('settingsService', ['tabsStorageService' ,function (tabsStorageService) {
-    var settings = [];
-    this.init = function () {
+    var settings = new Object();
+    
+    this.initSettingsObject = function () {
         tabsStorageService.getSettings(function (settingsCallback) {
             if (settingsCallback) {
                 settings = settingsCallback;
+                console.log("loading settings from object");
+                console.log(settings);
+
             }
             else { // set defaultvalues
-                settings.push('autoCloseCompletedTask', false);
+                console.log("loading settings from default");
+                settings.autoSortTabs =  false;
+                settings.autoCloseCompletedTask =  false;
+                settings.showCloseCompletedTask= true;
+                settings.showCloseUnCompletedTask=  true;
+                settings.showClosedTaskFor= 86400000;
             }
         });
     }
 
-    this.get
+    this.getSettings = function () {
+        return settings;
+    };
 
+    this.saveSettings = function (newSettings) {
+        settings = newSettings;
+        console.log("saving values to");
+        console.log(settings);
+        tabsStorageService.saveSettings(settings);
+     }
+    
 }]);
 
 myApp.service('tabsInfoService', function() {
@@ -166,14 +187,14 @@ myApp.service('tabsInfoService', function() {
 });
 
 
-myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoService, tabsStorageService) {
+myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoService, tabsStorageService , settingsService) {
 
     $scope.tasksArray = [];
     $scope.closedTabArray = [];
     $scope.hasClosedTabs = false;
     $scope.editorEnabled = false;
   
-  
+    settingsService.initSettingsObject();
 
     
     $scope.sortableOptions = {
@@ -388,8 +409,10 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
             debugger;
              if (closedTabsInfos){
                  tasksArray = closedTabsInfos;
-                  //86400000
-                var dayBeforeTime = Date.now() - 86400000 ;  // todo change according to config
+                 //3600000 - `1 hour
+                 //86400000 - 24 hours
+                 // 604800000 - one week
+                var dayBeforeTime = Date.now() - settingsService.getSettings().showClosedTaskFor ;  // todo change according to config
 
                 for (var i=0;i<tasksArray.length;i++) {
                     var tabId = tasksArray[i].tabId;
@@ -559,13 +582,30 @@ myApp.directive('focusMe', function($timeout, $parse) {
 
 
 
+myApp.controller("settinsContoller" ,  function($scope, settingsService, tabsStorageService) {
+    
+    $scope.settingsObject  = settingsService.getSettings();
+
+    $scope.Save = function () {
+        settingsService.saveSettings($scope.settingsObject);
+    }
+    /* settings.autoSortTabs =  false;
+    settings.autoCloseCompletedTask =  false;
+    settings.showCloseCompletedTask= true;
+    settings.showCloseUnCompletedTask=  true;
+    settings.showClosedTaskFor= 0;*/
+    
+});
 
 
 myApp.controller("MgmController", function ($scope, ngDialog) {
     $scope.openSettings = function () {
         ngDialog.open({ 
             template: 'settings.html', 
-            className: 'ngdialog-theme-plain'});
+            className: 'ngdialog-theme-plain',
+            controller: 'settinsContoller'
+
+        });
     };
 });
 
