@@ -72,6 +72,40 @@ myApp.service('tabsStorageService', function () {
     }
 
 });
+myApp.factory('settingsFactory', ['tabsStorageService' ,function (tabsStorageService) {
+    var settings = new Object();
+    return {
+        initSettingsObject : function () {
+            tabsStorageService.getSettings(function (settingsCallback) {
+                if (settingsCallback) {
+                    settings = settingsCallback;
+                    console.log("loading settings from object");
+                    console.log(settings);
+
+                }
+                else { // set defaultvalues
+                    console.log("loading settings from default");
+                    settings.autoSortTabs =  false;
+                    settings.autoCloseCompletedTask =  false;
+                    settings.showCloseCompletedTask= true;
+                    settings.showCloseUnCompletedTask=  true;
+                    settings.showClosedTaskFor= 86400000;
+                }
+            });
+        },
+        getSettings: function () {
+            return settings;
+        },
+
+        saveSettings : function (newSettings) {
+            settings = newSettings;
+            console.log("saving values to");
+            console.log(settings);
+            tabsStorageService.saveSettings(settings);
+            } 
+
+    };
+}]);
 
 myApp.service('settingsService', ['tabsStorageService' ,function (tabsStorageService) {
     var settings = new Object();
@@ -94,6 +128,7 @@ myApp.service('settingsService', ['tabsStorageService' ,function (tabsStorageSer
             }
         });
     }
+
 
     this.getSettings = function () {
         return settings;
@@ -187,14 +222,14 @@ myApp.service('tabsInfoService', function() {
 });
 
 
-myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoService, tabsStorageService , settingsService) {
+myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoService, tabsStorageService , settingsFactory) {
 
     $scope.tasksArray = [];
     $scope.closedTabArray = [];
     $scope.hasClosedTabs = false;
     $scope.editorEnabled = false;
   
-    settingsService.initSettingsObject();
+    settingsFactory.initSettingsObject();
 
     
     $scope.sortableOptions = {
@@ -206,6 +241,10 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     }
   };
 
+   
+   $scope.IsCompletedInSettings = function () {
+        return settingsFactory.getSettings().showCloseCompletedTask;
+   };
    
     $scope.changeTabPage = function (tabId){
         tabsInfoService.changeTab(tabId);
@@ -267,6 +306,9 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         $scope.content[index] = changeState($scope.content[index], "completeTask");
         $scope.content[index].closedDate = Date.now();
         saveTasksArray(index);
+        if (settingsFactory.getSettings().autoCloseCompletedTask){
+            $scope.closeTabPage(tabId, index);
+        }
     };
 
     $scope.renameTabPage = function (tabId, index) {
@@ -373,13 +415,13 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                              found = true;
                          }
                     }
-
-                     tasksArray.forEach(function (task) {
+                    var dayBeforeTime = Date.now() - settingsFactory.getSettings().showClosedTaskFor ;  
+                    tasksArray.forEach(function (task) {
                         if (task && !newTaskArray[task.tabId]) {
                             console.log("found completed task to show");
                             console.log(task);
                        
-                            if (!IsExistsInListTab($scope.closedTabArray, task.tabId)) {
+                            if (!IsExistsInListTab($scope.closedTabArray, task.tabId) && task.closedDate && dayBeforeTime< task.closedDate) {
                                 $scope.closedTabArray.push(task);
                                 $scope.hasClosedTabs = true;
                                 saveClosedTasks();
@@ -412,7 +454,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                  //3600000 - `1 hour
                  //86400000 - 24 hours
                  // 604800000 - one week
-                var dayBeforeTime = Date.now() - settingsService.getSettings().showClosedTaskFor ;  // todo change according to config
+                var dayBeforeTime = Date.now() - settingsFactory.getSettings().showClosedTaskFor ;  
 
                 for (var i=0;i<tasksArray.length;i++) {
                     var tabId = tasksArray[i].tabId;
@@ -582,12 +624,12 @@ myApp.directive('focusMe', function($timeout, $parse) {
 
 
 
-myApp.controller("settinsContoller" ,  function($scope, settingsService, tabsStorageService) {
+myApp.controller("settinsContoller" ,  function($scope, settingsFactory, tabsStorageService) {
     
-    $scope.settingsObject  = settingsService.getSettings();
+    $scope.settingsObject  = settingsFactory.getSettings();
 
     $scope.Save = function () {
-        settingsService.saveSettings($scope.settingsObject);
+        settingsFactory.saveSettings($scope.settingsObject);
     }
     /* settings.autoSortTabs =  false;
     settings.autoCloseCompletedTask =  false;

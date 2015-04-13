@@ -28,10 +28,6 @@
             </div>
         </header>
         <section  ng-controller="PageController">
-            <div class="actions clearfix">
-                    <button class="icon-feedback" onClick="getTabsInfo()"></button>
-              
-                </div>
             <ul ui-sortable="sortableOptions" ng-model='content'>
                     <content-item class="tab" ng-repeat="item in content | filter:searchText" content="item"
                     close-tab="closeTabPage(tabToChange, $index)" 
@@ -44,9 +40,9 @@
                     ></content-item>
             </ul>
 
-            <span ng-if='hasClosedTabs' class="closed-tasks-title" 
+            <span ng-if='hasClosedTabs  && IsCompletedInSettings()' class="closed-tasks-title" 
             title="You may select how long to see this tasks in settings section">Completed TabToDos</span>
-            <ul class="closedTabs">
+            <ul class="closedTabs" ng-if='hasClosedTabs  && IsCompletedInSettings()'>
                 <li ng-repeat="completedTask in closedTabArray"  class="tab">
                     <span><img ng-src="{{completedTask.favIconUrl}}" class="tab_favicon no-cursor" alt=""></span>
                     <span><p class="tab_link line-through no-cursor">{{completedTask.title}}</p></span>
