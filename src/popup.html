@@ -40,15 +40,28 @@
                     ></content-item>
             </ul>
 
-            <span ng-if='hasClosedTabs  && IsCompletedInSettings()' class="closed-tasks-title" 
+            <span ng-if='hasClosedCompletedTabs  && IsCompletedInSettings()' class="closed-tasks-title" 
             title="You may select how long to see this tasks in settings section">Completed TabToDos</span>
-            <ul class="closedTabs" ng-if='hasClosedTabs  && IsCompletedInSettings()'>
+            <ul class="closedTabs" ng-if='hasClosedCompletedTabs  && IsCompletedInSettings()'>
                 <li ng-repeat="completedTask in closedTabArray"  class="tab">
                     <span><img ng-src="{{completedTask.favIconUrl}}" class="tab_favicon no-cursor" alt=""></span>
                     <span><p class="tab_link line-through no-cursor">{{completedTask.title}}</p></span>
                     <span class="tab_actions">
                         <button ng-click="clearCompletedTask($index)" class="close icon-close" title="Clear From List" ></button>
                         <button ng-click="reopenClosedTab($index, completedTask)" class="add icon-return" title="ReOpen Tab" ></button>
+                    </span>
+                </li>
+            </ul>
+
+            <span ng-if='hasClosedUnCompletedTabs  && IsUnCompletedInSettings()' class="closed-tasks-title" 
+            title="You may select how long to see this tasks in settings section">UnCompleted TabToDos</span>
+            <ul class="closedTabs" ng-if='hasClosedUnCompletedTabs  && IsUnCompletedInSettings()'>
+                <li ng-repeat="completedTask in closedUnCompletedTabArray"  class="tab">
+                    <span><img ng-src="{{completedTask.favIconUrl}}" class="tab_favicon no-cursor" alt=""></span>
+                    <span><p class="tab_link no-cursor">{{completedTask.title}}</p></span>
+                    <span class="tab_actions">
+                        <button ng-click="clearUnCompletedTask($index)" class="close icon-close" title="Clear From List" ></button>
+                        <button ng-click="reopenClosedUnCopletedTab($index, completedTask)" class="add icon-return" title="ReOpen Tab" ></button>
                     </span>
                 </li>
             </ul>

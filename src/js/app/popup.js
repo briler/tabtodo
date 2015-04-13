@@ -54,6 +54,22 @@ myApp.service('tabsStorageService', function () {
           //message('Settings saved');
         });
     }
+
+    this.getUnCompletedClosedTasks = function (callback){
+        chrome.storage.sync.get('unCompletedclosedTabsList2', function (value) {
+            if (value && value.closedTabsList2)
+                callback(value.closedTabsList2);
+            else
+                callback(null);
+        })
+    }
+
+    this.saveUnCompletedClosedTasks = function (tabsList) {
+        chrome.storage.sync.set({'unCompletedclosedTabsList2': tabsList}, function() {
+          // Notify that we saved.
+          //message('Settings saved');
+        });
+    }//saveUnCompletedClosedTasks
     
     this.getSettings = function (callback) {
         chrome.storage.sync.get('tabtodoSettings' , function (value) {
@@ -72,6 +88,7 @@ myApp.service('tabsStorageService', function () {
     }
 
 });
+
 myApp.factory('settingsFactory', ['tabsStorageService' ,function (tabsStorageService) {
     var settings = new Object();
     return {
@@ -107,41 +124,6 @@ myApp.factory('settingsFactory', ['tabsStorageService' ,function (tabsStorageSer
     };
 }]);
 
-myApp.service('settingsService', ['tabsStorageService' ,function (tabsStorageService) {
-    var settings = new Object();
-    
-    this.initSettingsObject = function () {
-        tabsStorageService.getSettings(function (settingsCallback) {
-            if (settingsCallback) {
-                settings = settingsCallback;
-                console.log("loading settings from object");
-                console.log(settings);
-
-            }
-            else { // set defaultvalues
-                console.log("loading settings from default");
-                settings.autoSortTabs =  false;
-                settings.autoCloseCompletedTask =  false;
-                settings.showCloseCompletedTask= true;
-                settings.showCloseUnCompletedTask=  true;
-                settings.showClosedTaskFor= 86400000;
-            }
-        });
-    }
-
-
-    this.getSettings = function () {
-        return settings;
-    };
-
-    this.saveSettings = function (newSettings) {
-        settings = newSettings;
-        console.log("saving values to");
-        console.log(settings);
-        tabsStorageService.saveSettings(settings);
-     }
-    
-}]);
 
 myApp.service('tabsInfoService', function() {
 
@@ -226,25 +208,34 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 
     $scope.tasksArray = [];
     $scope.closedTabArray = [];
-    $scope.hasClosedTabs = false;
+    $scope.hasClosedCompletedTabs = false;
+
+    $scope.closedUnCompletedTabArray = [];
+    $scope.hasClosedUnCompletedTabs = false;
+
     $scope.editorEnabled = false;
   
     settingsFactory.initSettingsObject();
 
     
     $scope.sortableOptions = {
-    stop: function(e, ui) {
-        debugger;
-      var item = ui.item.scope().item;
-      var toIndex = ui.item.index();
-      tabsInfoService.moveTab(item.tabId, toIndex);
-    }
-  };
+        stop: function(e, ui) {
+          var item = ui.item.scope().item;
+          var toIndex = ui.item.index();
+          tabsInfoService.moveTab(item.tabId, toIndex);
+        }
+    };
 
    
    $scope.IsCompletedInSettings = function () {
         return settingsFactory.getSettings().showCloseCompletedTask;
    };
+
+   $scope.IsUnCompletedInSettings = function () {
+        return settingsFactory.getSettings().showCloseUnCompletedTask;
+   };
+
+
    
     $scope.changeTabPage = function (tabId){
         tabsInfoService.changeTab(tabId);
@@ -262,7 +253,15 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 
             $scope.closedTabArray.push(task);    
             saveClosedTasks();
-            $scope.hasClosedTabs = true;
+            $scope.hasClosedCompletedTabs = true;
+        }
+
+        if ($scope.content[index].type == 'openTask') {
+            var task = $scope.content[index];
+            
+            $scope.closedUnCompletedTabArray.push(task);    
+            saveClosedTasks();
+            $scope.hasClosedUnCompletedTabs = true;
         }
 
         // remove from list
@@ -338,6 +337,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
 
     function saveClosedTasks(){
         tabsStorageService.saveClosedTasks($scope.closedTabArray);
+        tabsStorageService.saveUnCompletedClosedTasks($scope.closedUnCompletedTabArray);
     }
 
     function changeState(tabItemModel, newState){
@@ -380,7 +380,23 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         saveClosedTasks();
         if ($scope.closedTabArray.length == 0)
         {
-            $scope.hasClosedTabs = false;
+            $scope.hasClosedCompletedTabs = false;
+        }
+    }
+
+    $scope.clearUnCompletedTask = function(index) {
+        // we need to remove it from the task list to prevent it from reoccuring
+        var tabTask = $scope.closedUnCompletedTabArray[index];
+        
+        $scope.tasksArray.splice(tabTask.tabId, 1);
+        tabsStorageService.saveTabs($scope.tasksArray);
+
+        $scope.closedUnCompletedTabArray.splice(index, 1);
+        
+        saveClosedTasks();
+        if ($scope.closedUnCompletedTabArray.length == 0)
+        {
+            $scope.hasClosedUnCompletedTabs = false;
         }
     }
 
@@ -390,6 +406,14 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         tabsInfoService.createTab(completedTask.url);
 
     }
+
+    $scope.reopenClosedUnCopletedTab = function(index, completedTask) {
+        
+        $scope.clearUnCompletedTask(index);
+        tabsInfoService.createTab(completedTask.url);
+
+    }
+
 
     $scope.reload = function () {
       //  alert('reload');
@@ -423,10 +447,18 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                        
                             if (!IsExistsInListTab($scope.closedTabArray, task.tabId) && task.closedDate && dayBeforeTime< task.closedDate) {
                                 $scope.closedTabArray.push(task);
-                                $scope.hasClosedTabs = true;
+                                $scope.hasClosedCompletedTabs = true;
                                 saveClosedTasks();
-
                             }
+                            // This means that the uncompleted task was closed 
+                            // We just check if it wasn't because already in the lists
+                            else if (!IsExistsInListTab($scope.closedTabArray, task.tabId) && !IsExistsInListTab($scope.closedUnCompletedTabArray, task.tabId)) {
+                                $scope.closedUnCompletedTabArray.push(task);
+                                $scope.hasClosedUnCompletedTabs = true;
+                                saveClosedTasks();
+                            }
+
+
                         }
                      });
 
@@ -461,7 +493,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                     if (tasksArray[i].closedDate > dayBeforeTime) {
                         $scope.closedTabArray.push(tasksArray[i]);
                         //$scope.closedTabArray[''+tasksArray[i].tabId]= tasksArray[i];
-                        $scope.hasClosedTabs = true;
+                        $scope.hasClosedCompletedTabs = true;
                     }        
                 }
 
