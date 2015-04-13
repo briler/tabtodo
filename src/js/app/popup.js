@@ -376,8 +376,17 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     }
 
     $scope.clearCompletedTask = function(index) {
+        var tabTask = $scope.closedTabArray[index];
+        // remove it from the task array if exists
+        if ($scope.tasksArray[tabTask.tabId]) {
+            console.log("removing from task array");
+            $scope.tasksArray.splice(tabTask.tabId, 1);
+        }
+        
+        tabsStorageService.saveTabs($scope.tasksArray);
         $scope.closedTabArray.splice(index, 1);
         saveClosedTasks();
+
         if ($scope.closedTabArray.length == 0)
         {
             $scope.hasClosedCompletedTabs = false;
@@ -387,10 +396,12 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     $scope.clearUnCompletedTask = function(index) {
         // we need to remove it from the task list to prevent it from reoccuring
         var tabTask = $scope.closedUnCompletedTabArray[index];
-        
-        $scope.tasksArray.splice(tabTask.tabId, 1);
+        if ($scope.tasksArray[tabTask.tabId]) {
+            console.log("removing from task array");
+            $scope.tasksArray.splice(tabTask.tabId, 1);
+        }
         tabsStorageService.saveTabs($scope.tasksArray);
-
+        
         $scope.closedUnCompletedTabArray.splice(index, 1);
         
         saveClosedTasks();
@@ -442,10 +453,11 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                     var dayBeforeTime = Date.now() - settingsFactory.getSettings().showClosedTaskFor ;  
                     tasksArray.forEach(function (task) {
                         if (task && !newTaskArray[task.tabId]) {
-                            console.log("found completed task to show");
-                            console.log(task);
+                            
                        
                             if (!IsExistsInListTab($scope.closedTabArray, task.tabId) && task.closedDate && dayBeforeTime< task.closedDate) {
+                                console.log("found completed task to show");
+                                console.log(task);
                                 $scope.closedTabArray.push(task);
                                 $scope.hasClosedCompletedTabs = true;
                                 saveClosedTasks();
@@ -453,6 +465,8 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
                             // This means that the uncompleted task was closed 
                             // We just check if it wasn't because already in the lists
                             else if (!IsExistsInListTab($scope.closedTabArray, task.tabId) && !IsExistsInListTab($scope.closedUnCompletedTabArray, task.tabId)) {
+                                console.log("found uncompleted task to show");
+                                console.log(task);
                                 $scope.closedUnCompletedTabArray.push(task);
                                 $scope.hasClosedUnCompletedTabs = true;
                                 saveClosedTasks();
