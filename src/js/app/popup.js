@@ -150,6 +150,17 @@ myApp.service('tabsInfoService', function() {
             function (tabArray) { tabCallback(tabArray[0]); }
         );
     }
+     this.refreshTab = function(tabCallback) { 
+        // remove popup by selecting the tab
+     
+        chrome.tabs.query(
+            { currentWindow: true, active: true },
+            function (tab) { 
+                chrome.tabs.update(tab[0].id, {selected: true});
+             }
+        );
+    }
+
 
     this.moveTab = function(tabId, newIndex) {
         chrome.tabs.move(tabId, {index:newIndex}, function () {});
@@ -686,7 +697,7 @@ myApp.controller("settinsContoller" ,  function($scope, settingsFactory, tabsSto
 });
 
 
-myApp.controller("MgmController", function ($scope, ngDialog) {
+myApp.controller("MgmController", function ($scope, ngDialog, tabsInfoService) {
     $scope.openSettings = function () {
         ngDialog.open({ 
             template: 'settings.html', 
@@ -694,6 +705,10 @@ myApp.controller("MgmController", function ($scope, ngDialog) {
             controller: 'settinsContoller'
 
         });
+    };
+
+    $scope.closeMe = function () {
+        tabsInfoService.refreshTab();
     };
 });
 
