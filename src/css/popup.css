@@ -3,6 +3,7 @@ body {
 	-webkit-font-smoothing: antialiased;
 	font: 14px/24px;
 	width: 500px;
+	min-height: 550px;
 	position: relative;
 	float: left;
 }
