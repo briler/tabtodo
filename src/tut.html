@@ -1,0 +1,52 @@
+      <header>
+        <button ng-disabled='currentTutIndex==1' class="tutButton" ng-click="GetPrev()" title="Prev slide" >Back</button>
+        <button ng-disabled='currentTutIndex==7' class="tutButton" ng-click="GetNext()" title="Next slide" >Next</button>
+
+          
+
+        <div style="position: absolute;right: 50px;">
+            <button class="tutButton done" ng-click="closeThisDialog(true)" title="Ok let me start" >Finish Tutorial</button>
+            Slide {{currentTutIndex}}/7
+         </div>
+
+        
+        
+            
+      </header>
+ 
+
+ <ul >
+    <li ng-if='currentTutIndex==1'>
+       <span class="settings-tab">Welcome to TabToDo - see all open tabs</span> 
+        
+       <div class="tutImage tutorialFirst"></div>
+    </li>
+     
+     <li ng-if='currentTutIndex==2'>
+       <span class="settings-tab">TabtoDo any tab by adding it as a task</span> 
+       <div class="tutImage tutorialSecond"></div>
+    </li>
+
+    <li ng-if='currentTutIndex==3'>
+       <span class="settings-tab">You can Rename a tab- will also rename the tab header.</span> 
+       <div class="tutImage tutorialThird"></div>
+    </li>
+    <li ng-if='currentTutIndex==4'>
+       <span class="settings-tab">Once completed- mark a tab as done by hovering it and checking the left icon checkbox</span> 
+       <div class="tutImage tutorialFourth"></div>
+    </li>
+    <li ng-if='currentTutIndex==5'>
+       <span class="settings-tab">Any tab can have several status</span> 
+       <div class="tutImage tutorialFifth"></div>
+    </li>
+    <li ng-if='currentTutIndex==6'>
+       <span class="settings-tab">Closing a tab - that easy</span> 
+       <div class="tutImage tutorialSixth"></div>
+    </li>
+    <li ng-if='currentTutIndex==7'>
+       <span class="settings-tab">Have control over closed tabTodo, as well as task that were not completed. You can always reopen any closed tab</span> 
+       <div class="tutImage tutorialLast"></div>
+    </li>
+
+ </ul>
+   

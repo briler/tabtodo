@@ -90,6 +90,7 @@ button:active {
 	background-image: url(../img/icon+logo_@2x.png);
 }
 
+
 input[type=search] { 
 	-webkit-box-flex: 1;
 	-webkit-flex-grow: 1;
@@ -311,7 +312,7 @@ input[type=search] {
   height: 24px;
   width: 430px;
   color: #555;
-  white-space: nowrap;
+  /*white-space: nowrap;*/
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
@@ -341,4 +342,56 @@ select {
   /*color: black;*/
   background-color: white;
   cursor: default;
+}
+
+
+.tutButton {
+	color: inherit;
+	border: 2px outset buttonface;
+  	border-image-source: initial;
+  	border-image-slice: initial;
+  	border-image-width: initial;
+  	border-image-outset: initial;
+  	border-image-repeat: initial;
+  	font-size: 16px;
+  	line-height: 16px;
+  	text-align: center;
+  	margin-right: 4px;
+}
+
+.done {
+	color: #fff;
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+}
+
+
+.tutImage {
+	margin: 6px;
+	margin-right: 0;
+	width: 400px;
+	height: 400px;
+	background-size: cover;
+}
+
+.tutorialFirst {
+	background-image: url(../img/TTD-1.png);	
+}
+.tutorialSecond {
+	background-image: url(../img/TTD-2.png);	
+}
+.tutorialThird {
+	background-image: url(../img/TTD-3.png);	
+}
+.tutorialFourth {
+	background-image: url(../img/TTD-4.png);	
+}
+.tutorialFifth {
+	background-image: url(../img/TTD-5.png);	
+}
+.tutorialSixth {
+	background-image: url(../img/TTD-6.png);	
+}
+.tutorialLast {
+	background-image: url(../img/TTD-7.png);	
 }

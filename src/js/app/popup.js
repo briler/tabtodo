@@ -48,6 +48,8 @@ myApp.service('tabsStorageService', function () {
         })
     }
 
+
+
     this.saveClosedTasks = function (tabsList) {
         chrome.storage.sync.set({'closedTabsList2': tabsList}, function() {
           // Notify that we saved.
@@ -78,6 +80,23 @@ myApp.service('tabsStorageService', function () {
             else
             callback(null);  
         })
+    }
+
+    this.showTutorial = function(showTutorialFlag) {
+        chrome.storage.sync.get('tutorialShowned' , function (value) {
+          if (value && value.tutorialShowned)
+          {
+            console.log("tutorial Already showed");
+            showTutorialFlag(false);
+            }
+          else {
+            console.log("tutorial new");
+            chrome.storage.sync.set({'tutorialShowned': true}, function() {
+          
+            });
+            showTutorialFlag(true);
+          }  
+        });   
     }
 
     this.saveSettings = function (tabtodoSettings) {
@@ -215,7 +234,7 @@ myApp.service('tabsInfoService', function() {
 });
 
 
-myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoService, tabsStorageService , settingsFactory) {
+myApp.controller("PageController", function ($scope, $timeout, ngDialog, pageInfoService, tabsInfoService, tabsStorageService , settingsFactory) {
 
     $scope.tasksArray = [];
     $scope.closedTabArray = [];
@@ -227,7 +246,7 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
     $scope.editorEnabled = false;
   
     settingsFactory.initSettingsObject();
-
+    
     
     $scope.sortableOptions = {
         stop: function(e, ui) {
@@ -533,8 +552,25 @@ myApp.controller("PageController", function ($scope, pageInfoService, tabsInfoSe
         
         $scope.reload();
         
+
+
     })();
     
+    tabsStorageService.showTutorial(function (showTutorial) {
+        if (showTutorial) {
+              // See if tutorial was not loaded and load it for the first time
+            $timeout(function() {
+                ngDialog.open({ 
+                    template: 'tut.html',
+                    className: 'ngdialog-theme-plain', 
+                    controller: 'settinsContoller'
+
+                });
+            }, 700);
+        }
+    });
+  
+        
     function findTab(tabId) {
         //search array for key
         var items = $scope.content;
@@ -681,9 +717,20 @@ myApp.directive('focusMe', function($timeout, $parse) {
 
 
 
-myApp.controller("settinsContoller" ,  function($scope, settingsFactory, tabsStorageService) {
+myApp.controller("settinsContoller" ,  function($scope, settingsFactory, ngDialog, tabsStorageService) {
     
     $scope.settingsObject  = settingsFactory.getSettings();
+
+    $scope.currentTutIndex = 1;
+
+    $scope.GetNext = function () {
+
+        $scope.currentTutIndex =  $scope.currentTutIndex +1 ;        
+    }
+
+    $scope.GetPrev = function () {
+        $scope.currentTutIndex =  $scope.currentTutIndex -1;        
+    }
 
     $scope.Save = function () {
         settingsFactory.saveSettings($scope.settingsObject);
@@ -693,11 +740,37 @@ myApp.controller("settinsContoller" ,  function($scope, settingsFactory, tabsSto
     settings.showCloseCompletedTask= true;
     settings.showCloseUnCompletedTask=  true;
     settings.showClosedTaskFor= 0;*/
-    
+  
+
+    $scope.enterValidation = function(){
+        return true;
+    };
+
+    $scope.exitValidation = function(){
+        return true;
+    };
+     $scope.finished = function() {
+            alert("Wizard finished :)");
+        }
+
+        $scope.logStep = function() {
+            console.log("Step continued");
+        }
+
+    $scope.ChangeToTutorial = function () {
+
+        ngDialog.close('this');
+        ngDialog.open({ 
+           template: 'tut.html',
+           className: 'ngdialog-theme-plain', 
+           controller: 'settinsContoller'
+
+        });
+    }
 });
 
 
-myApp.controller("MgmController", function ($scope, ngDialog, tabsInfoService) {
+myApp.controller("MgmController", function ($scope, $window, ngDialog, tabsInfoService) {
     $scope.openSettings = function () {
         ngDialog.open({ 
             template: 'settings.html', 
@@ -707,9 +780,25 @@ myApp.controller("MgmController", function ($scope, ngDialog, tabsInfoService) {
         });
     };
 
+    $scope.openTutorial = function () {
+        ngDialog.open({ 
+            template: 'tut.html',
+            className: 'ngdialog-theme-plain', 
+            controller: 'settinsContoller'
+
+        });
+    };
+
     $scope.closeMe = function () {
         tabsInfoService.refreshTab();
     };
+
+    $scope.feedback = function () {
+
+       $window.location = "mailto:foo@bar.com?subject=mail subject&body=mail body";
+      
+    };
+
 });
 
 
