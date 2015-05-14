@@ -790,12 +790,12 @@ myApp.controller("MgmController", function ($scope, $window, ngDialog, tabsInfoS
     };
 
     $scope.closeMe = function () {
-        tabsInfoService.refreshTab();
+        $window.close();
     };
 
     $scope.feedback = function () {
 
-       $window.location = "mailto:foo@bar.com?subject=mail subject&body=mail body";
+       $window.open("http://www.tabtodo.com/#!contact/cvrh"); 
       
     };
 
