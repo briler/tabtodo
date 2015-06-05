@@ -523,6 +523,11 @@ myApp.controller("PageController", function ($scope, $timeout, ngDialog, pageInf
                     else
                        $scope.tasksArray = [];
 
+                   if(!$scope.hasClosedCompletedTabs)
+                        $scope.closedTabArray = [];
+
+                    if (!$scope.hasClosedUnCompletedTabs)
+                        $scope.closedUnCompletedTabArray = [];
 
                 }
 
@@ -546,7 +551,10 @@ myApp.controller("PageController", function ($scope, $timeout, ngDialog, pageInf
 
                 for (var i=0;i<tasksArray.length;i++) {
                     var tabId = tasksArray[i].tabId;
-                    if (tasksArray[i].closedDate > dayBeforeTime) {
+
+                    if (tasksArray[i].closedDate > dayBeforeTime) {// && !IsExistsInListTab($scope.closedTabArray, tasksArray[i].tabId)) {
+                        console.log("found completed task to show 2:");
+                        console.log(tasksArray[i]);
                         $scope.closedTabArray.push(tasksArray[i]);
                         //$scope.closedTabArray[''+tasksArray[i].tabId]= tasksArray[i];
                         $scope.hasClosedCompletedTabs = true;
