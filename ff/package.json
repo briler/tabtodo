@@ -1,0 +1,12 @@
+{
+  "title": "TabToDo",
+  "name": "tabtodo",
+  "version": "0.0.0",
+  "description": "Turn open tabs into daily tasks",
+  "main": "index.js",
+  "author": "TabToDo",
+  "engines": {
+    "firefox": ">=38.0a1"
+  },
+  "license": "MIT"
+}
